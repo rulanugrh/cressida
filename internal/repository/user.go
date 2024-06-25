@@ -8,9 +8,9 @@ import (
 
 type UserRepository interface {
 	Create(request web.Register) (*domain.User, error)
-	FindEmail(request web.Login) (*domain.User, error)
+	CheckEmail(email string) error
+	Login(request web.Login) (*domain.User, error)
 	GetMe(email string) (*domain.User, error)
-	FindID(id uint) (*domain.User, error)
 }
 
 type user struct {
@@ -24,11 +24,6 @@ func NewUserRepository(conn *config.SDatabase) UserRepository {
 
 func(u *user) Create(request web.Register) (*domain.User, error) {
 	var response domain.User
-
-	findEmail := u.conn.DB.Exec("SELECT * FROM users WHERE email = ?", request.Email)
-	if findEmail.RowsAffected != 0 {
-		return nil, findEmail.Error
-	}
 
 	create := u.conn.DB.Exec("INSERT INTO users(f_name, l_name, email, address, password, phone, role_id) VALUES (?,?,?,?,?,?,?)",
 		request.FName,
@@ -49,7 +44,16 @@ func(u *user) Create(request web.Register) (*domain.User, error) {
 
 }
 
-func(u *user) FindEmail(request web.Login) (*domain.User, error) {
+func(u *user) CheckEmail(email string) error {
+	find := u.conn.DB.Exec("SELECT * FROM users WHERE email = ?",email)
+	if find.RowsAffected > 0 {
+		return web.BadRequest("Sorry email has been taken")
+	}
+
+	return nil
+}
+
+func(u *user) Login(request web.Login) (*domain.User, error) {
 	var response domain.User
 	find := u.conn.DB.Exec("SELECT * FROM users WHERE email = ?",request.Email).Preload("Role").Find(&response)
 	if find.RowsAffected < 1 {
@@ -59,19 +63,10 @@ func(u *user) FindEmail(request web.Login) (*domain.User, error) {
 	return &response, nil
 }
 
+
 func(u *user) GetMe(email string) (*domain.User, error) {
 	var response domain.User
 	find := u.conn.DB.Exec("SELECT * FROM users WHERE email = ?",email).Preload("Role").Find(&response)
-	if find.RowsAffected < 1 {
-		return nil, find.Error
-	}
-
-	return &response, nil
-}
-
-func(u *user) FindID(id uint) (*domain.User, error) {
-	var response domain.User
-	find := u.conn.DB.Exec("SELECT * FROM users WHERE id = ?",id).Preload("Role").Find(&response)
 	if find.RowsAffected < 1 {
 		return nil, find.Error
 	}

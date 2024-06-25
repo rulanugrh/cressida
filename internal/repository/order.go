@@ -81,3 +81,12 @@ func(o *order) GetHistory(userID uint) (*[]domain.Order, error) {
 	return &response, nil
 }
 
+func (o *order) UpdateStatus(uuid string, status string) (*domain.Order, error) {
+	var response domain.Order
+	err := o.conn.DB.Exec("UPDATE orders SET status = ? WHERE id = ?", status, uuid).Preload("Transporter").Preload("User").Find(&response).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
+}

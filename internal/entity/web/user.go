@@ -32,7 +32,6 @@ type ResponseGetUser struct {
 	FName    string `json:"f_name" form:"f_name"`
 	LName    string `json:"l_name" form:"l_name"`
 	Email    string `json:"email" form:"email"`
-	Password string `json:"password" form:"password"`
 	Address  string `json:"address" form:"address"`
 	Phone    string `json:"phone" form:"phone"`
 	Role     string `json:"role" form:"role"`
