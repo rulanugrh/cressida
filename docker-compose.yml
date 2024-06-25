@@ -1,0 +1,41 @@
+version: '3.9'
+services:
+  db-cressida:
+    container_name: db-cressida
+    image: postgres:alpine
+    hostname: db-cressida
+    environment:
+      - POSTGRES_DB=${POSTGRESQL_NAME}
+      - POSTGRES_USER=${POSTGRESQL_USER}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+    ports:
+      - 127.0.0.1:{POSTGRESQL_PORT}:5432
+    networks:
+      - cressida
+  
+
+  app-cressida:
+    container_name: app-cressida
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP_PORT=${APP_PORT}
+    environment:
+      - APP_PORT=${APP_PORT}
+      - APP_HOST=${APP_HOST}
+      - POSTGRESQL_NAME=${POSTGRESQL_NAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_PORT=${POSTGRESQL_PORT}
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - APP_SECRET=${APP_SECRET}
+    ports:
+      - 4000:${APP_PORT}
+    networks:
+      - cressida
+    depends_on:
+      - db-cressida
+
+networks:
+  cressida:
+    driver: bridge
