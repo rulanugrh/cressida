@@ -13,9 +13,10 @@ type TransporterRequest struct {
 }
 
 type TransporterResponse struct {
-	DriverName string `json:"driver_name" form:"driver_name"`
-	Weight     int64  `json:"max_weight" form:"max_weight"`
-	Distance   int64  `json:"max_distance" form:"max_distance"`
+	VehicleName string `json:"vehicle_name" form:"vehicle_name"`
+	DriverName  string `json:"driver_name" form:"driver_name"`
+	Weight      int64  `json:"max_weight" form:"max_weight"`
+	Distance    int64  `json:"max_distance" form:"max_distance"`
 }
 
 type VehicleResponseGet struct {
