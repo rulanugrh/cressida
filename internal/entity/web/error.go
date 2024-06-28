@@ -1,5 +1,7 @@
 package web
 
+import "encoding/json"
+
 type Response struct {
 	Code    int         `json:"code"`
 	Message string      `json:"msg"`
@@ -10,9 +12,22 @@ func (r *Response) Error() string {
 	return r.Message
 }
 
+func Marshalling(data any) []byte {
+	response, _ := json.Marshal(data)
+	return response
+}
+
 func Success(message string, data any) error {
 	return &Response{
 		Code:    200,
+		Message: message,
+		Data:    data,
+	}
+}
+
+func Found(message string, data any) error {
+	return &Response{
+		Code:    302,
 		Message: message,
 		Data:    data,
 	}

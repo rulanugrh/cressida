@@ -14,7 +14,6 @@ type UserServive interface {
 	Register(request web.Register) (*web.ResponseRegister, error)
 	Login(request web.Login) (*web.ResponseLogin, error)
 	GetMe(email string) (*web.ResponseGetUser, error)
-	InsertToken(email string, token string) error
 }
 
 type user struct {
@@ -136,16 +135,4 @@ func (u *user) GetMe(email string) (*web.ResponseGetUser, error) {
 
 	u.log.Info("Account Found", email)
 	return &response, nil
-}
-
-func (u *user) InsertToken(email string, token string) error {
-	// checking and insert token into db
-	err := u.repository.InsertToken(email, token)
-	if err != nil {
-		u.log.Error(err)
-		return web.BadRequest("error while input token")
-	}
-
-	u.log.Info("Success Insert Token", email)
-	return nil
 }
