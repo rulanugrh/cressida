@@ -55,9 +55,8 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]domain.Vehicle, error) {
 
 func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*domain.Transporter, error) {
 	var response domain.Transporter
-	err := v.conn.DB.Exec("INSERT INTO transporters(vehicle_type, driver_id, max_weight, max_distance) VALUES (?,?,?,?)",
+	err := v.conn.DB.Exec("INSERT INTO transporters(vehicle_type, max_weight, max_distance) VALUES (?,?,?,?)",
 		request.VehicleType,
-		request.DriverID,
 		request.MaxWeight,
 		request.MaxDistance,
 	).Scan(&response).Error

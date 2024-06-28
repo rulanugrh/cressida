@@ -71,7 +71,6 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 	for _, v := range data.Transporters {
 		transporters = append(transporters, web.TransporterResponse{
 			VehicleName: data.Name,
-			DriverName: v.Driver.FName + " " + v.Driver.LName,
 			Weight: v.MaxWeight,
 			Distance: v.MaxDistance,
 		})
@@ -107,7 +106,6 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, erro
 		for _, v := range result.Transporters {
 			transporters = append(transporters, web.TransporterResponse{
 				VehicleName: v.Vehicle.Name,
-				DriverName: v.Driver.FName + " " + v.Driver.LName,
 				Weight: v.MaxWeight,
 				Distance: v.MaxDistance,
 			})
@@ -144,7 +142,6 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 	// parsing response into new struct
 	response := web.TransporterResponse{
 		VehicleName: data.Vehicle.Name,
-		DriverName: data.Driver.FName + " " + data.Driver.LName,
 		Weight: data.MaxWeight,
 		Distance: data.MaxDistance,
 	}
@@ -164,7 +161,6 @@ func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) 
 	// parsing response into new struct
 	response := web.TransporterResponse{
 		VehicleName: data.Vehicle.Name,
-		DriverName: data.Driver.FName + " " + data.Driver.LName,
 		Weight: data.MaxWeight,
 		Distance: data.MaxDistance,
 	}
@@ -188,7 +184,6 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterRe
 	for _, val := range *data {
 		response = append(response, web.TransporterResponse{
 			VehicleName: val.Vehicle.Name,
-			DriverName: val.Driver.FName + " " + val.Driver.LName,
 			Weight: val.MaxWeight,
 			Distance: val.MaxDistance,
 		})
