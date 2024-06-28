@@ -1,7 +1,10 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/rulanugrh/cressida/internal/entity/web"
+	"github.com/rulanugrh/cressida/internal/helper"
 	"github.com/rulanugrh/cressida/internal/middleware"
 	"github.com/rulanugrh/cressida/internal/repository"
 )
@@ -18,12 +21,14 @@ type VehicleService interface {
 type vehicle struct {
 	repository repository.VehicleRepository
 	validate middleware.IValidation
+	log helper.ILog
 }
 
 func NewVehicleService(repository repository.VehicleRepository) VehicleService {
 	return &vehicle{
 		repository: repository,
 		validate: middleware.NewValidation(),
+		log: helper.NewLogger(),
 	}
 }
 
@@ -32,12 +37,14 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponse
 	// validate request struct data
 	err := v.validate.Validate(request)
 	if err != nil {
+		v.log.Error(err)
 		return nil, v.validate.ValidationMessage(err)
 	}
 
 	// insert data into repository
-	data, err := v.repository.CreateVehicle(request)
-	if err != nil {
+	data, errCreate := v.repository.CreateVehicle(request)
+	if errCreate != nil {
+		v.log.Error(errCreate)
 		return nil, web.BadRequest("cannot insert vehicle")
 	}
 
@@ -47,6 +54,7 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponse
 		Description: data.Description,
 	}
 
+	v.log.Info("Success Append Vehicle to DB", data.Name)
 	return &response, nil
 }
 
@@ -54,6 +62,7 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 	// find data by id
 	data, err := v.repository.FindByID(id)
 	if err != nil {
+		v.log.Error(err)
 		return nil, web.NotFound("sorry data with this id not found")
 	}
 
@@ -65,7 +74,7 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 			DriverName: v.Driver.FName + " " + v.Driver.LName,
 			Weight: v.MaxWeight,
 			Distance: v.MaxDistance,
-		})
+		}) 
 	}
 
 	// parsing response into new struct
@@ -75,6 +84,7 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 		Transporter: transporters,
 	}
 
+	v.log.Info("Found", id)
 	return &response, nil
 }
 
@@ -82,6 +92,7 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, erro
 	// find all data vehicle
 	data, err := v.repository.FindAll(perPage, page)
 	if err != nil {
+		v.log.Error(err)
 		return nil, web.BadRequest("cannot find all data vehicles")
 	}
 
@@ -111,6 +122,7 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, erro
 		response = append(response, vehicle)
 	}
 
+	v.log.Info("Success Find All Vehicle")
 	return &response, nil
 }
 
@@ -118,12 +130,14 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 	// validate request struct data
 	err := v.validate.Validate(request)
 	if err != nil {
+		v.log.Error(err)
 		return nil, v.validate.ValidationMessage(err)
 	}
 
 	// insert into repository layer
 	data, err := v.repository.CreateTransporter(request)
 	if err != nil {
+		v.log.Debug(fmt.Sprintf("cannot insert data transporter: %s", err.Error()))
 		return nil, web.BadRequest("cannot insert data")
 	}
 
@@ -135,6 +149,7 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 		Distance: data.MaxDistance,
 	}
 
+	v.log.Info("success add transporter", data.ID)
 	return &response, nil
 }
 
@@ -142,6 +157,7 @@ func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) 
 	// find transporter by id
 	data, err := v.repository.FindByIDTransporter(id)
 	if err != nil {
+		v.log.Error(err)
 		return nil, web.NotFound("sorry transporter not found")
 	}
 
@@ -153,6 +169,7 @@ func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) 
 		Distance: data.MaxDistance,
 	}
 
+	v.log.Info("success get transporter by this id", id)
 	return &response, nil
 }
 
@@ -160,6 +177,7 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterRe
 	// find all data transporter
 	data, err := v.repository.FindAllTransporter(perPage, page)
 	if err != nil {
+		v.log.Error(err)
 		return nil, web.BadRequest("data cannot response")
 	}
 
@@ -176,5 +194,6 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterRe
 		})
 	}
 
+	v.log.Info("success get all transporter")
 	return &response, nil
 }

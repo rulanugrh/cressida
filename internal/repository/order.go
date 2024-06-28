@@ -12,6 +12,7 @@ type OrderRepository interface {
 	GetOrder(uuid string) (*domain.Order, error)
 	SaveTransaction(request domain.Transaction) (*domain.Transaction, error)
 	GetHistory(userID uint) (*[]domain.Order, error)
+	UpdateStatus(uuid string, status string) (*domain.Order, error)
 }
 
 type order struct {

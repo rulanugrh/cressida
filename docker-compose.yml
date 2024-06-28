@@ -35,6 +35,42 @@ services:
       - cressida
     depends_on:
       - db-cressida
+  
+  jaeger-cressida:
+    container_name: jaeger-cressida
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+    ports:
+      - 9411:9411
+      - 14269:14269
+      - 14268:14268
+      - 16686:16686
+      - 5778:5778
+      - 4317:4317
+      - 4318:4318
+    networks:
+      - cressida
+  
+  prometheus-cressida:
+    container_name: prometheus-cressida
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./infrastructure/config.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - cressida
+  
+  grafana-cressida:
+    container_name: grafana-cressida
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    networks:
+      - cressida
+    depends_on:
+      - prometheus-cressida
 
 networks:
   cressida:
