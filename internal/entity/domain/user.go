@@ -11,6 +11,7 @@ type User struct {
 	Address  string `json:"address" form:"address"`
 	Phone    string `json:"phone" form:"phone"`
 	RoleID   uint   `json:"role_id" form:"role_id"`
+	Token    string `json:"token" form:"token"`
 	Role     Role   `json:"role" form:"role" gorm:"foreignKey:RoleID;references:ID"`
 }
 

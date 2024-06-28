@@ -11,6 +11,7 @@ type UserRepository interface {
 	CheckEmail(email string) error
 	Login(request web.Login) (*domain.User, error)
 	GetMe(email string) (*domain.User, error)
+	InsertToken(email string, token string) error
 }
 
 type user struct {
@@ -72,4 +73,13 @@ func(u *user) GetMe(email string) (*domain.User, error) {
 	}
 
 	return &response, nil
+}
+
+func (u *user) InsertToken(email string, token string) error {
+	err := u.conn.DB.Exec("UPDATE users SET token = ? WHERE email = ?",token,email).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
