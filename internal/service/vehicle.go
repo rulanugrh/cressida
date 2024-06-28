@@ -15,7 +15,7 @@ type VehicleService interface {
 	FindAll(perPage int, page int) (*[]web.VehicleResponseGet, error)
 	CreateTransporter(request web.TransporterRequest) (*web.TransporterResponse, error)
 	FindTransporterByID(id uint) (*web.TransporterResponse, error)
-	FindAllTransporter(perPage int, page int) (*[]web.TransporterResponse, error) 
+	FindAllTransporter(perPage int, page int) (*[]web.TransporterResponse, error)
 }
 
 type vehicle struct {
@@ -74,7 +74,7 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 			DriverName: v.Driver.FName + " " + v.Driver.LName,
 			Weight: v.MaxWeight,
 			Distance: v.MaxDistance,
-		}) 
+		})
 	}
 
 	// parsing response into new struct
@@ -183,7 +183,7 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterRe
 
 	// new variable for parsing value
 	var response []web.TransporterResponse
-	
+
 	// looping data for parsing
 	for _, val := range *data {
 		response = append(response, web.TransporterResponse{

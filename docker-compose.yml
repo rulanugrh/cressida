@@ -12,11 +12,11 @@ services:
       - 127.0.0.1:{POSTGRESQL_PORT}:5432
     networks:
       - cressida
-  
+
 
   app-cressida:
     container_name: app-cressida
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
       args:
@@ -35,7 +35,7 @@ services:
       - cressida
     depends_on:
       - db-cressida
-  
+
   jaeger-cressida:
     container_name: jaeger-cressida
     image: jaegertracing/all-in-one:latest
@@ -51,7 +51,7 @@ services:
       - 4318:4318
     networks:
       - cressida
-  
+
   prometheus-cressida:
     container_name: prometheus-cressida
     image: prom/prometheus
@@ -61,7 +61,7 @@ services:
       - ./infrastructure/config.yml:/etc/prometheus/prometheus.yml
     networks:
       - cressida
-  
+
   grafana-cressida:
     container_name: grafana-cressida
     image: grafana/grafana:latest
