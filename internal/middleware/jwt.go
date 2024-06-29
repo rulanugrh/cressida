@@ -12,6 +12,8 @@ type InterfaceJWT interface {
 	GenerateAccessToken(request web.ResponseLogin) (*string, error)
 	CheckUserID(token string) (*uint, error)
 	CheckEmail(token string) (*string, error)
+	captureToken(token string) (*jwtClaim, error)
+	ValidateAdmin(token string) bool
 }
 
 type JWT struct {
@@ -54,7 +56,7 @@ func(j *JWT) GenerateAccessToken(request web.ResponseLogin) (*string, error) {
 	return &token, nil
 }
 
-func(j *JWT) CheckUserID(token string) (*uint, error) {
+func(j *JWT) captureToken(token string) (*jwtClaim, error) {
 	tkn, err := jwt.ParseWithClaims(token, &jwtClaim{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(j.config.Server.Secret), nil
 	})
@@ -66,24 +68,34 @@ func(j *JWT) CheckUserID(token string) (*uint, error) {
 	claim, valid := tkn.Claims.(*jwtClaim)
 	if !valid {
 		return nil, web.Unauthorized("Sorry you're not loggin into app")
+	}
+
+	return claim, nil
+}
+
+func(j *JWT) CheckUserID(token string) (*uint, error) {
+	claim, err := j.captureToken(token)
+	if err != nil {
+		return nil, web.BadRequest(err.Error())
 	}
 
 	return &claim.ID, nil
 }
 
 func(j *JWT) CheckEmail(token string) (*string, error) {
-	tkn, err := jwt.ParseWithClaims(token, &jwtClaim{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(j.config.Server.Secret), nil
-	})
-
+	claim, err := j.captureToken(token)
 	if err != nil {
-		return nil, web.BadRequest("error while parsing claim token")
+		return nil, web.BadRequest(err.Error())
 	}
-
-	claim, valid := tkn.Claims.(*jwtClaim)
-	if !valid {
-		return nil, web.Unauthorized("Sorry you're not loggin into app")
-	}
-
 	return &claim.Email, nil
+}
+
+func (j *JWT) ValidateAdmin(token string) bool {
+	claim, _ := j.captureToken(token)
+
+	if claim.RoleID > 1 {
+		return false
+	}
+
+	return true
 }
