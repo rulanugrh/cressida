@@ -73,6 +73,8 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 			VehicleName: data.Name,
 			Weight: v.MaxWeight,
 			Distance: v.MaxDistance,
+			DriverName: v.Driver.FName + " " + v.Driver.LName,
+			Price: v.Price,
 		})
 	}
 
@@ -108,6 +110,8 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, erro
 				VehicleName: v.Vehicle.Name,
 				Weight: v.MaxWeight,
 				Distance: v.MaxDistance,
+				DriverName: v.Driver.FName + " " + v.Driver.LName,
+				Price: v.Price,
 			})
 		}
 
@@ -144,6 +148,8 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 		VehicleName: data.Vehicle.Name,
 		Weight: data.MaxWeight,
 		Distance: data.MaxDistance,
+		DriverName: data.Driver.FName + " " + data.Driver.LName,
+		Price: data.Price,
 	}
 
 	v.log.Info("success add transporter", data.ID)
@@ -186,6 +192,8 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterRe
 			VehicleName: val.Vehicle.Name,
 			Weight: val.MaxWeight,
 			Distance: val.MaxDistance,
+			DriverName: val.Driver.FName + " " + val.Driver.LName,
+			Price: val.Price,
 		})
 	}
 

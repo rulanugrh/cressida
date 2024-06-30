@@ -11,9 +11,13 @@ type OrderService interface {
 	// interface for create new order
 	CreateOrder(request web.OrderRequest) (*web.OrderResponse, error)
 	// interface for get order
-	GetOrder(uuid string) (*web.OrderResponse, error)
+	GetOrder(uuid string, userID uint) (*web.OrderResponse, error)
 	// interface for get history
 	GetHistory(userID uint) (*[]web.OrderResponse, error)
+	// interfce for get order with status process
+	GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, error)
+	// interface for update status
+	UpdateStatus(uuid string, status string) (*web.OrderResponse, error)
 }
 
 type order struct {
@@ -71,8 +75,14 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 		UserName:         data.User.FName + " " + data.User.LName,
 		Weight:           data.Weight,
 		Distance:         data.Distance,
-		PickupLocation:   data.PickupLocation,
-		DeliveryLocation: data.DeliveryLocation,
+		PickupLat:        data.PickupLat,
+		PickupLang:       data.PickupLang,
+		PickupCoordinate: data.PickupCoordinate,
+		PickupAddress:    data.PickupAddress,
+		DropLat:          data.DropLat,
+		DropLang:         data.DropLang,
+		DropCoordinate:   data.DropCoordinate,
+		DropAddress:      data.DropAddress,
 		Description:      data.Description,
 	}
 
@@ -80,9 +90,9 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 	return &response, nil
 }
 
-func (o *order) GetOrder(uuid string) (*web.OrderResponse, error) {
+func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
 	// get order by uuid
-	data, err := o.repository.GetOrder(uuid)
+	data, err := o.repository.GetOrder(uuid, userID)
 	if err != nil {
 		o.log.Error(err)
 		return nil, web.NotFound("sorry data with this uuid not found")
@@ -93,8 +103,14 @@ func (o *order) GetOrder(uuid string) (*web.OrderResponse, error) {
 		UserName:         data.User.FName + " " + data.User.LName,
 		Weight:           data.Weight,
 		Distance:         data.Distance,
-		PickupLocation:   data.PickupLocation,
-		DeliveryLocation: data.DeliveryLocation,
+		PickupLat:        data.PickupLat,
+		PickupLang:       data.PickupLang,
+		PickupCoordinate: data.PickupCoordinate,
+		PickupAddress:    data.PickupAddress,
+		DropLat:          data.DropLat,
+		DropLang:         data.DropLang,
+		DropCoordinate:   data.DropCoordinate,
+		DropAddress:      data.DropAddress,
 		Description:      data.Description,
 	}
 
@@ -116,8 +132,14 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 		response = append(response, web.OrderResponse{
 			Distance:         v.Distance,
 			Weight:           v.Weight,
-			DeliveryLocation: v.DeliveryLocation,
-			PickupLocation:   v.PickupLocation,
+			PickupLat:        v.PickupLat,
+			PickupLang:       v.PickupLang,
+			PickupCoordinate: v.PickupCoordinate,
+			PickupAddress:    v.PickupAddress,
+			DropLat:          v.DropLat,
+			DropLang:         v.DropLang,
+			DropCoordinate:   v.DropCoordinate,
+			DropAddress:      v.DropAddress,
 			Description:      v.Description,
 			UserName:         v.User.FName + " " + v.User.LName,
 		})
@@ -140,11 +162,48 @@ func (o *order) UpdateStatus(uuid string, status string) (*web.OrderResponse, er
 		UserName:         data.User.FName + " " + data.User.LName,
 		Weight:           data.Weight,
 		Distance:         data.Distance,
-		PickupLocation:   data.PickupLocation,
-		DeliveryLocation: data.DeliveryLocation,
+		PickupLat:        data.PickupLat,
+		PickupLang:       data.PickupLang,
+		PickupCoordinate: data.PickupCoordinate,
+		PickupAddress:    data.PickupAddress,
+		DropLat:          data.DropLat,
+		DropLang:         data.DropLang,
+		DropCoordinate:   data.DropCoordinate,
+		DropAddress:      data.DropAddress,
 		Description:      data.Description,
 	}
 
 	o.log.Info("Have been Update to DB", uuid)
+	return &response, nil
+}
+
+func (o *order) GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, error) {
+	// get history by user id
+	data, err := o.repository.CheckOrderProcess(perPage, page)
+	if err != nil {
+		o.log.Error(err)
+		return nil, web.BadRequest("sorry order not found")
+	}
+
+	// looping data for passing into new variable response
+	var response []web.OrderResponse
+	for _, v := range *data {
+		response = append(response, web.OrderResponse{
+			Distance:         v.Distance,
+			Weight:           v.Weight,
+			PickupLat:        v.PickupLat,
+			PickupLang:       v.PickupLang,
+			PickupCoordinate: v.PickupCoordinate,
+			PickupAddress:    v.PickupAddress,
+			DropLat:          v.DropLat,
+			DropLang:         v.DropLang,
+			DropCoordinate:   v.DropCoordinate,
+			DropAddress:      v.DropAddress,
+			Description:      v.Description,
+			UserName:         v.User.FName + " " + v.User.LName,
+		})
+	}
+
+	o.log.Info("success get all order proceess")
 	return &response, nil
 }

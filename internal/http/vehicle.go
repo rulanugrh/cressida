@@ -154,9 +154,25 @@ func (v *vehicle) GetAllVehicle(w http.ResponseWriter, r *http.Request) {
 // @Param request body web.TranspoterRequest true "request body for add transporter"
 // @Router /api/transporters/add [post]
 // @Success 201 {object} web.Response
+// @Failure 401 {object} web.Response
+// @Failure 403 {object} web.Response
 // @Failure 400 {object} web.Response
 // @Failure 500 {object} web.Response
 func (v *vehicle) CreateTransporter(w http.ResponseWriter, r *http.Request) {
+	// check token
+	if r.Header.Get("Authorization") == "" {
+		w.WriteHeader(401)
+		w.Write(web.Marshalling(web.Unauthorized("required token for this page")))
+		return
+	}
+
+	// validate for role admin
+	driver := v.middleware.ValidateDriver(r.Header.Get("Authorization"))
+	if !driver {
+		w.WriteHeader(403)
+		w.Write(web.Marshalling(web.Forbidden("sorry you're not driver")))
+		return
+	}
 	// decode request body
 	var request web.TransporterRequest
 	err := json.NewDecoder(r.Body).Decode(&request)

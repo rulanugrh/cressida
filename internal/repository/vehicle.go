@@ -35,7 +35,7 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*domain.Vehicle, err
 
 func(v *vehicle) FindByID(id uint) (*domain.Vehicle, error) {
 	var response domain.Vehicle
-	err := v.conn.DB.Exec("SELECT * FROM vehicles WHERE id = ?", id).Preload("Transporters").Find(&response).Error
+	err := v.conn.DB.Exec("SELECT * FROM vehicles WHERE id = ?", id).Preload("Transporters").Preload("Transporters.Driver").Find(&response).Error
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func(v *vehicle) FindByID(id uint) (*domain.Vehicle, error) {
 
 func(v *vehicle) FindAll(perPage int, page int) (*[]domain.Vehicle, error) {
 	var response []domain.Vehicle
-	err := v.conn.DB.Exec("SELECT * FROM vehicles").Offset((page - 1) * perPage).Limit(perPage).Find(&response).Error
+	err := v.conn.DB.Exec("SELECT * FROM vehicles").Offset((page - 1) * perPage).Limit(perPage).Preload("Transporters").Preload("Transporters.Driver").Find(&response).Error
 	if err != nil {
 		return nil, err
 	}
@@ -55,10 +55,12 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]domain.Vehicle, error) {
 
 func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*domain.Transporter, error) {
 	var response domain.Transporter
-	err := v.conn.DB.Exec("INSERT INTO transporters(vehicle_type, max_weight, max_distance) VALUES (?,?,?,?)",
+	err := v.conn.DB.Exec("INSERT INTO transporters(driver_id, vehicle_type, max_weight, max_distance, price) VALUES (?,?,?,?,?)",
+		request.DriverID,
 		request.VehicleType,
 		request.MaxWeight,
 		request.MaxDistance,
+		request.Price,
 	).Scan(&response).Error
 
 	if err != nil {

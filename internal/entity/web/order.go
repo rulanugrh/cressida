@@ -5,19 +5,30 @@ type OrderRequest struct {
 	UserID           uint   `json:"user_id" form:"user_id" validate:"required"`
 	Weight           int64  `json:"weight" form:"weight" validate:"required"`
 	Distance         int64  `json:"distance" form:"distance" validate:"required"`
-	PickupLocation   string `json:"pickup_location" form:"pickup_location" validate:"required"`
-	DeliveryLocation string `json:"delivery_location" form:"delivery_location" validate:"required"`
 	Description      string `json:"description" form:"description" validate:"required"`
-	Status           string `json:"status" form:"status" validate:"required"`
+	PickupLat        string `json:"pickup_lat" form:"pickup_lat" validate:"required"`
+	PickupLang       string `json:"pickup_lang" form:"pickup_lang" validate:"required"`
+	PickupCoordinate string `json:"pickup_coordinate" form:"pickup_coordinate" validate:"required"`
+	PickupAddress    string `json:"pickup_address" form:"pickup_address" validate:"required"`
+	DropLat          string `json:"drop_lat" from:"drop_lat" validate:"required"`
+	DropLang         string `json:"drop_lang" from:"drop_lang" validate:"required"`
+	DropCoordinate   string `json:"drop_coordinate" from:"drop_coordinate" validate:"required"`
+	DropAddress      string `json:"drop_address" from:"drop_address" validate:"required"`
 }
 
 type OrderResponse struct {
 	UserName         string `json:"user_name" form:"user_name"`
 	Weight           int64  `json:"weight" form:"weight" `
 	Distance         int64  `json:"distance" form:"distance" `
-	PickupLocation   string `json:"pickup_location" form:"pickup_location"`
-	DeliveryLocation string `json:"delivery_location" form:"delivery_location" `
-	Description      string `json:"description" form:"description" `
+	PickupLat        string `json:"pickup_lat" form:"pickup_lat"`
+	PickupLang       string `json:"pickup_lang" form:"pickup_lang"`
+	PickupCoordinate string `json:"pickup_coordinate" form:"pickup_coordinate"`
+	PickupAddress    string `json:"pickup_address" form:"pickup_address"`
+	DropLat          string `json:"drop_lat" from:"drop_lat"`
+	DropLang         string `json:"drop_lang" from:"drop_lang"`
+	DropCoordinate   string `json:"drop_coordinate" from:"drop_coordinate"`
+	DropAddress      string `json:"drop_address" from:"drop_address"`
+	Description      string `json:"description" form:"description"`
 }
 
 type TransactionResponse struct {

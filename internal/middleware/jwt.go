@@ -14,6 +14,7 @@ type InterfaceJWT interface {
 	CheckEmail(token string) (*string, error)
 	captureToken(token string) (*jwtClaim, error)
 	ValidateAdmin(token string) bool
+	ValidateDriver(token string) bool
 }
 
 type JWT struct {
@@ -93,7 +94,16 @@ func(j *JWT) CheckEmail(token string) (*string, error) {
 func (j *JWT) ValidateAdmin(token string) bool {
 	claim, _ := j.captureToken(token)
 
-	if claim.RoleID > 1 {
+	if claim.RoleID != 1 {
+		return false
+	}
+
+	return true
+}
+func (j *JWT) ValidateDriver(token string) bool {
+	claim, _ := j.captureToken(token)
+
+	if claim.RoleID != 2 {
 		return false
 	}
 

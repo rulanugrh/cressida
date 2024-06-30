@@ -11,8 +11,14 @@ type Order struct {
 	UserID           uint        `json:"user_id" form:"user_id"`
 	Weight           int64       `json:"weight" form:"weight"`
 	Distance         int64       `json:"distance" form:"distance"`
-	PickupLocation   string      `json:"pickup_location" form:"pickup_location"`
-	DeliveryLocation string      `json:"delivery_location" form:"delivery_location"`
+	PickupLat        string      `json:"pickup_lat" form:"pickup_lat"`
+	PickupLang       string      `json:"pickup_lang" form:"pickup_lang"`
+	PickupCoordinate string      `json:"pickup_coordinate" form:"pickup_coordinate"`
+	PickupAddress    string      `json:"pickup_address" form:"pickup_address"`
+	DropLat          string      `json:"drop_lat" from:"drop_lat"`
+	DropLang         string      `json:"drop_lang" from:"drop_lang"`
+	DropCoordinate   string      `json:"drop_coordinate" from:"drop_coordinate"`
+	DropAddress      string      `json:"drop_address" from:"drop_address"`
 	Description      string      `json:"description" form:"description"`
 	Status           string      `json:"status" form:"status"`
 	Transporter      Transporter `json:"transporter" form:"transporter" gorm:"foreignKey:TransporterID;references:ID"`
