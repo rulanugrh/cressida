@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/rulanugrh/cressida/internal/entity/web"
 	"github.com/rulanugrh/cressida/internal/helper"
 	"github.com/rulanugrh/cressida/internal/middleware"
@@ -40,33 +42,33 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 	// validate request struct
 	err := o.validate.Validate(request)
 	if err != nil {
-		o.log.Error(err)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [CreateOrder] Error while validate request: %s", err.Error()))
 		return nil, o.validate.ValidationMessage(err)
 	}
 
 	// create new variable for check data
 	check, err := o.vehicle.FindByIDTransporter(request.TransporterID)
 	if err != nil {
-		o.log.Debug("transporter with this id not found")
+		o.log.Debug(fmt.Sprintf("[SERVICE] - [CreateOrder] id: %d, transporter with this id not found", request.TransporterID))
 		return nil, web.NotFound("sorry transporter with this id not found")
 	}
 
 	// check the weight if it exceeds then return an error
 	if request.Weight > check.MaxWeight {
-		o.log.Debug("weight has been reach max weight")
+		o.log.Debug(fmt.Sprintf("[SERVICE] - [CreateOrder] %d kg, weight has been reach max weight", request.Weight))
 		return nil, web.BadRequest("weight exceeds the maximum weight")
 	}
 
 	// check the distance if it exceeds then return error
 	if request.Distance > check.MaxDistance {
-		o.log.Debug("distance has been reach max limit")
+		o.log.Debug(fmt.Sprintf("[SERVICE] - [CreateOrder] %d km, distance has been reach max limit", request.Distance))
 		return nil, web.BadRequest("distance exceeds the specified limits")
 	}
 
 	// input data into db
 	data, errCreate := o.repository.CreateOrder(request)
 	if errCreate != nil {
-		o.log.Error(errCreate)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [CreateOrder] Error while input into db: %s", errCreate.Error()))
 		return nil, web.BadRequest("cannot create request order")
 	}
 
@@ -86,7 +88,7 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 		Description:      data.Description,
 	}
 
-	o.log.Info("Have been Append to DB", data.ID.String())
+	o.log.Info(fmt.Sprintf("[SERVICE] - [CreateOrder] new order id %s append into db", data.ID.String()))
 	return &response, nil
 }
 
@@ -94,7 +96,7 @@ func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
 	// get order by uuid
 	data, err := o.repository.GetOrder(uuid, userID)
 	if err != nil {
-		o.log.Error(err)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [GetOrder] Error while get data in db: %s", err.Error()))
 		return nil, web.NotFound("sorry data with this uuid not found")
 	}
 
@@ -114,7 +116,7 @@ func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
 		Description:      data.Description,
 	}
 
-	o.log.Info("Found", data.ID.String())
+	o.log.Info(fmt.Sprintf("[SERVICE] - [GetOrder] order id %s success found", uuid))
 	return &response, nil
 }
 
@@ -122,7 +124,7 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 	// get history by user id
 	data, err := o.repository.GetHistory(userID)
 	if err != nil {
-		o.log.Error(err)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [GetHistory] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry history with this id not found")
 	}
 
@@ -145,7 +147,7 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 		})
 	}
 
-	o.log.Info("success get his history", userID)
+	o.log.Info(fmt.Sprintf("[SERVICE] - [GetHistory] userID: %d success get history", userID))
 	return &response, nil
 }
 
@@ -153,14 +155,14 @@ func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse,
 	// validate request struct
 	err := o.validate.Validate(request)
 	if err != nil {
-		o.log.Error(err)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [UpdateStatus] Error while validate request: %s", err.Error()))
 		return nil, o.validate.ValidationMessage(err)
 	}
 
 	// get order by uuid and update status
 	data, err := o.repository.UpdateStatus(request.UUID, request.Status)
 	if err != nil {
-		o.log.Error(err)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [UpdateStatus] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry you cant update status with this order uuid")
 	}
 
@@ -180,7 +182,7 @@ func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse,
 		Description:      data.Description,
 	}
 
-	o.log.Info("Have been Update to DB", request.UUID)
+	o.log.Info(fmt.Sprintf("[SERVICE] - [UpdateStatus] order id %s success update status: %s", request.UUID, request.Status))
 	return &response, nil
 }
 
@@ -188,7 +190,7 @@ func (o *order) GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, er
 	// get history by user id
 	data, err := o.repository.CheckOrderProcess(perPage, page)
 	if err != nil {
-		o.log.Error(err)
+		o.log.Error(fmt.Sprintf("[SERVICE] - [GetOrderProcess] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry order not found")
 	}
 
@@ -211,6 +213,6 @@ func (o *order) GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, er
 		})
 	}
 
-	o.log.Info("success get all order proceess")
+	o.log.Info("[SERVICE] - [GetOrderProcess] success get all order process")
 	return &response, nil
 }

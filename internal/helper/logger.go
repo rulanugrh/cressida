@@ -1,15 +1,14 @@
 package helper
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 )
 
 type ILog interface {
-	Info(message string, args ...any)
+	Info(message string)
 	Debug(message string)
-	Error(err error)
+	Error(err string)
 	Warn(message string)
 }
 
@@ -23,17 +22,16 @@ func NewLogger() ILog {
 	}
 }
 
-func(l *Logger) Info(message string, args ...any) {
-	msg := fmt.Sprintf("%v, %s", args, message)
-	l.log.Info(msg)
+func(l *Logger) Info(message string) {
+	l.log.Info(message)
 }
 
 func(l *Logger) Debug(message string) {
 	l.log.Debug(message)
 }
 
-func(l *Logger) Error(err error) {
-	l.log.Error(err.Error())
+func(l *Logger) Error(err string) {
+	l.log.Error(err)
 }
 
 func(l *Logger) Warn(message string) {
