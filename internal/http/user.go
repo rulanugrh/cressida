@@ -14,6 +14,8 @@ type UserHandler interface {
 	Register(w http.ResponseWriter, r *http.Request)
 	// Endpoint for login user
 	Login(w http.ResponseWriter, r *http.Request)
+	// Endpoint for get me
+	GetMe(w http.ResponseWriter, r *http.Request)
 }
 
 type user struct {
