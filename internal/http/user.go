@@ -33,6 +33,7 @@ func NewUserHandler(service service.UserServive) UserHandler {
 // @Tags users
 // @Accept json
 // @Produce json
+// @Param request body web.Register true "request body for register new user"
 // @Router /api/user/register [post]
 // @Success 200 {object} web.Response
 // @Failure 400 {object} web.Response
@@ -64,6 +65,7 @@ func(u *user) Register(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Accept json
 // @Produce json
+// @Param request body web.Login true "request body for login user"
 // @Router /api/user/login [post]
 // @Success 200 {object} web.Response
 // @Failure 400 {object} web.Response

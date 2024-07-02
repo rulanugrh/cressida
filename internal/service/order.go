@@ -17,7 +17,7 @@ type OrderService interface {
 	// interfce for get order with status process
 	GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, error)
 	// interface for update status
-	UpdateStatus(uuid string, status string) (*web.OrderResponse, error)
+	UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse, error)
 }
 
 type order struct {
@@ -149,9 +149,16 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 	return &response, nil
 }
 
-func (o *order) UpdateStatus(uuid string, status string) (*web.OrderResponse, error) {
+func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse, error) {
+	// validate request struct
+	err := o.validate.Validate(request)
+	if err != nil {
+		o.log.Error(err)
+		return nil, o.validate.ValidationMessage(err)
+	}
+
 	// get order by uuid and update status
-	data, err := o.repository.UpdateStatus(uuid, status)
+	data, err := o.repository.UpdateStatus(request.UUID, request.Status)
 	if err != nil {
 		o.log.Error(err)
 		return nil, web.BadRequest("sorry you cant update status with this order uuid")
@@ -173,7 +180,7 @@ func (o *order) UpdateStatus(uuid string, status string) (*web.OrderResponse, er
 		Description:      data.Description,
 	}
 
-	o.log.Info("Have been Update to DB", uuid)
+	o.log.Info("Have been Update to DB", request.UUID)
 	return &response, nil
 }
 

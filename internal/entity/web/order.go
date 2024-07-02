@@ -38,3 +38,8 @@ type TransactionResponse struct {
 	Distance    int64  `json:"distance" form:"distance"`
 	Subtotal    int64  `json:"subtotal" form:"subtotal"`
 }
+
+type UpdateOrderStatus struct {
+	UUID string `json:"id" form:"id" validate:"required"`
+	Status string `json:"status" form:"status" validate:"required"`
+}
