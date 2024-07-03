@@ -7,12 +7,11 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRESQL_NAME}
       - POSTGRES_USER=${POSTGRESQL_USER}
-      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASS}
     ports:
       - 127.0.0.1:{POSTGRESQL_PORT}:5432
     networks:
       - cressida
-
 
   app-cressida:
     container_name: app-cressida
@@ -25,16 +24,19 @@ services:
       - APP_PORT=${APP_PORT}
       - APP_HOST=${APP_HOST}
       - POSTGRESQL_NAME=${POSTGRESQL_NAME}
-      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_PASS=${POSTGRESQL_PASS}
       - POSTGRESQL_PORT=${POSTGRESQL_PORT}
       - POSTGRESQL_USER=${POSTGRESQL_USER}
       - APP_SECRET=${APP_SECRET}
+      - OPENTELEMETRY_HOST=${OPENTELEMETRY_HOST}
+      - OPENTELEMETRY_PORT=${OPENTELEMETRY_PORT}
     ports:
       - 4000:${APP_PORT}
     networks:
       - cressida
     depends_on:
       - db-cressida
+      - jaeger-cressida
 
   jaeger-cressida:
     container_name: jaeger-cressida
