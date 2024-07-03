@@ -1,22 +1,30 @@
 package config
 
 import (
+	"context"
 	"fmt"
 
-	"gorm.io/gorm"
-	"gorm.io/driver/postgres"
 	"log"
+
+	"github.com/rulanugrh/cressida/internal/helper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type SDatabase struct {
 	DB *gorm.DB
+	trace helper.IOpenTelemetry
 }
 
 func InitPostgreSQL() *SDatabase {
-	return &SDatabase{}
+	return &SDatabase{trace: helper.NewOpenTelemetry()}
 }
 
 func (conn *SDatabase) DatabaseConnection() *gorm.DB {
+	// span for detect connection into db
+	span := conn.trace.StartTracer(context.Background(), "DatabaseConnection")
+	defer span.End()
+
 	cfg := GetConfig()
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",

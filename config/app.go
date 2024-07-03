@@ -61,5 +61,8 @@ func initConfig() *App {
 	conf.Server.Host = os.Getenv("SERVER_HOST")
 	conf.Server.Port = os.Getenv("SERVER_PORT")
 
+	conf.Opentelemetry.Host = os.Getenv("OPENTELEMETRY_HOST")
+	conf.Opentelemetry.Port = os.Getenv("OPENTELEMETRY_PORT")
+
 	return &conf
 }

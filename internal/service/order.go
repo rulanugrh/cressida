@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/rulanugrh/cressida/internal/entity/web"
@@ -27,6 +28,7 @@ type order struct {
 	vehicle    repository.VehicleRepository
 	validate   middleware.IValidation
 	log        helper.ILog
+	trace helper.IOpenTelemetry
 }
 
 func NewOrderService(repository repository.OrderRepository, vehicle repository.VehicleRepository) OrderService {
@@ -35,10 +37,15 @@ func NewOrderService(repository repository.OrderRepository, vehicle repository.V
 		vehicle:    vehicle,
 		validate:   middleware.NewValidation(),
 		log:        helper.NewLogger(),
+		trace: helper.NewOpenTelemetry(),
 	}
 }
 
 func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "CreateOrder")
+	defer span.End()
+
 	// validate request struct
 	err := o.validate.Validate(request)
 	if err != nil {
@@ -93,6 +100,10 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 }
 
 func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "GetOrder")
+	defer span.End()
+
 	// get order by uuid
 	data, err := o.repository.GetOrder(uuid, userID)
 	if err != nil {
@@ -121,6 +132,10 @@ func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
 }
 
 func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "GetHistory")
+	defer span.End()
+
 	// get history by user id
 	data, err := o.repository.GetHistory(userID)
 	if err != nil {
@@ -152,6 +167,10 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 }
 
 func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse, error) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "UpdateStatus")
+	defer span.End()
+
 	// validate request struct
 	err := o.validate.Validate(request)
 	if err != nil {
@@ -187,6 +206,10 @@ func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse,
 }
 
 func (o *order) GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, error) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "GetOrderProcess")
+	defer span.End()
+
 	// get history by user id
 	data, err := o.repository.CheckOrderProcess(perPage, page)
 	if err != nil {

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/rulanugrh/cressida/internal/entity/web"
@@ -20,6 +21,7 @@ type user struct {
 	repository repository.UserRepository
 	validate   middleware.IValidation
 	log        helper.ILog
+	trace helper.IOpenTelemetry
 }
 
 func NewUserService(repository repository.UserRepository) UserServive {
@@ -27,10 +29,15 @@ func NewUserService(repository repository.UserRepository) UserServive {
 		repository: repository,
 		validate:   middleware.NewValidation(),
 		log:        helper.NewLogger(),
+		trace: helper.NewOpenTelemetry(),
 	}
 }
 
 func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
+	// span active for tracing request
+	span := u.trace.StartTracer(context.Background(), "Register")
+	defer span.End()
+
 	// validation struct for request
 	err := u.validate.Validate(request)
 	if err != nil {
@@ -81,6 +88,10 @@ func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
 }
 
 func (u *user) Login(request web.Login) (*web.ResponseLogin, error) {
+	// span for tracing request
+	span := u.trace.StartTracer(context.Background(), "Login")
+	defer span.End()
+
 	// validation request user
 	err := u.validate.Validate(request)
 	if err != nil {
@@ -116,6 +127,10 @@ func (u *user) Login(request web.Login) (*web.ResponseLogin, error) {
 }
 
 func (u *user) GetMe(email string) (*web.ResponseGetUser, error) {
+	// span for tracing request to this function
+	span := u.trace.StartTracer(context.Background(), "GetMe")
+	defer span.End()
+
 	// checking data in database
 	result, err := u.repository.GetMe(email)
 	if err != nil {

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/rulanugrh/cressida/internal/entity/web"
@@ -22,6 +23,7 @@ type vehicle struct {
 	repository repository.VehicleRepository
 	validate middleware.IValidation
 	log helper.ILog
+	trace helper.IOpenTelemetry
 }
 
 func NewVehicleService(repository repository.VehicleRepository) VehicleService {
@@ -29,11 +31,16 @@ func NewVehicleService(repository repository.VehicleRepository) VehicleService {
 		repository: repository,
 		validate: middleware.NewValidation(),
 		log: helper.NewLogger(),
+		trace: helper.NewOpenTelemetry(),
 	}
 }
 
 
 func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponseCreate, error) {
+	// span for tracing request this endpoint
+	span := v.trace.StartTracer(context.Background(), "CreateVehicle")
+	defer span.End()
+
 	// validate request struct data
 	err := v.validate.Validate(request)
 	if err != nil {
@@ -59,6 +66,10 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponse
 }
 
 func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
+	// span for tracing request this endpoint
+	span := v.trace.StartTracer(context.Background(), "FindVehicleByID")
+	defer span.End()
+
 	// find data by id
 	data, err := v.repository.FindByID(id)
 	if err != nil {
@@ -90,6 +101,10 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 }
 
 func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, error) {
+	// span for tracing request this endpoint
+	span := v.trace.StartTracer(context.Background(), "FindAllVehicle")
+	defer span.End()
+
 	// find all data vehicle
 	data, err := v.repository.FindAll(perPage, page)
 	if err != nil {
@@ -129,6 +144,10 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, erro
 }
 
 func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.TransporterResponse, error) {
+	// span for tracing request this endpoint
+	span := v.trace.StartTracer(context.Background(), "CreateTransporter")
+	defer span.End()
+
 	// validate request struct data
 	err := v.validate.Validate(request)
 	if err != nil {
@@ -157,6 +176,10 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 }
 
 func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) {
+	// span for tracing request this endpoint
+	span := v.trace.StartTracer(context.Background(), "FindTransporterByID")
+	defer span.End()
+
 	// find transporter by id
 	data, err := v.repository.FindByIDTransporter(id)
 	if err != nil {
@@ -176,6 +199,10 @@ func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) 
 }
 
 func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterResponse, error)  {
+	// span for tracing request this endpoint
+	span := v.trace.StartTracer(context.Background(), "FindAllTransporter")
+	defer span.End()
+
 	// find all data transporter
 	data, err := v.repository.FindAllTransporter(perPage, page)
 	if err != nil {

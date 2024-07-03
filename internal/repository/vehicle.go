@@ -1,9 +1,12 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/rulanugrh/cressida/config"
 	"github.com/rulanugrh/cressida/internal/entity/domain"
 	"github.com/rulanugrh/cressida/internal/entity/web"
+	"github.com/rulanugrh/cressida/internal/helper"
 )
 
 type VehicleRepository interface {
@@ -17,19 +20,22 @@ type VehicleRepository interface {
 
 type vehicle struct {
 	conn *config.SDatabase
+	log helper.ILog
 }
 
 func NewVehicleRepository(conn *config.SDatabase) VehicleRepository {
-	return &vehicle{conn: conn}
+	return &vehicle{conn: conn, log: helper.NewLogger()}
 }
 
 func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*domain.Vehicle, error) {
 	var response domain.Vehicle
 	err := v.conn.DB.Exec("INSERT INTO vehicles(name, description) VALUES(?,?)", request.Name, request.Description).Scan(&response).Error
 	if err != nil {
+		v.log.Error(fmt.Sprintf("[REPOSITORY] - [CreateVehicle] %s", err.Error()))
 		return nil, err
 	}
 
+	v.log.Info(fmt.Sprintf("[REPOSITORY] - [CreateVehicle] new data has been append: %d", response.ID))
 	return &response, nil
 }
 
@@ -37,9 +43,11 @@ func(v *vehicle) FindByID(id uint) (*domain.Vehicle, error) {
 	var response domain.Vehicle
 	err := v.conn.DB.Exec("SELECT * FROM vehicles WHERE id = ?", id).Preload("Transporters").Preload("Transporters.Driver").Find(&response).Error
 	if err != nil {
+		v.log.Error(fmt.Sprintf("[REPOSITORY] - [FindByIDVehicle] %s", err.Error()))
 		return nil, err
 	}
 
+	v.log.Info(fmt.Sprintf("[REPOSITORY] - [FindByIDVehicle] id: %d, success found", id))
 	return &response, nil
 }
 
@@ -47,9 +55,11 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]domain.Vehicle, error) {
 	var response []domain.Vehicle
 	err := v.conn.DB.Exec("SELECT * FROM vehicles").Offset((page - 1) * perPage).Limit(perPage).Preload("Transporters").Preload("Transporters.Driver").Find(&response).Error
 	if err != nil {
+		v.log.Error(fmt.Sprintf("[REPOSITORY] - [FindAllVehicle] %s", err.Error()))
 		return nil, err
 	}
 
+	v.log.Info("[REPOSITORY] - [FindAllVehicle] success find all vehicle")
 	return &response, nil
 }
 
@@ -64,9 +74,11 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*domain.Tran
 	).Scan(&response).Error
 
 	if err != nil {
+		v.log.Error(fmt.Sprintf("[REPOSITORY] - [CreateTransporter] %s", err.Error()))
 		return nil, err
 	}
 
+	v.log.Info(fmt.Sprintf("[REPOSITORY] - [CreateTransporter] new data has been append: %d", response.ID))
 	return &response, nil
 }
 
@@ -74,9 +86,11 @@ func(v *vehicle) FindByIDTransporter(id uint) (*domain.Transporter, error) {
 	var response domain.Transporter
 	err := v.conn.DB.Exec("SELECT * FROM transporter WHERE id = ?", id).Preload("Vehicle").Preload("Driver").Find(&response).Error
 	if err != nil {
+		v.log.Error(fmt.Sprintf("[REPOSITORY] - [FindTransporterByID] %s", err.Error()))
 		return nil, err
 	}
 
+	v.log.Info(fmt.Sprintf("[REPOSITORY] - [FindTransporterByID] id: %d, success found", id))
 	return &response, nil
 }
 
@@ -84,8 +98,10 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]domain.Transporte
 	var response []domain.Transporter
 	err := v.conn.DB.Exec("SELECT * FROM transporter").Offset((page - 1) * page).Limit(perPage).Preload("Vehicle").Preload("Driver").Find(&response).Error
 	if err != nil {
+		v.log.Error(fmt.Sprintf("[REPOSITORY] - [FindAllTransporter] %s", err.Error()))
 		return nil, err
 	}
 
+	v.log.Info("[REPOSITORY] - [FindAllTransporter] success get all data")
 	return &response, nil
 }
