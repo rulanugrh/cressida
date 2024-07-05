@@ -16,16 +16,23 @@ import (
 
 func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler) {
 	cfg := config.GetConfig()
+
+	// register for observability
 	register := prometheus.NewRegistry()
+	observability := helper.NewPrometheus(register, nil)
+
+	// depend promhttp for collec with grafana and prometheus
+	promHandler := promhttp.HandlerFor(register, promhttp.HandlerOpts{})
 
 	r := mux.NewRouter().StrictSlash(true)
-	r.Handle("/metric", helper.NewPrometheus(register, nil).WrapHandler("/metrics", promhttp.HandlerFor(register, promhttp.HandlerOpts{})))
-
 	r.Use(middleware.CORS)
 
-	UserRoute(r, user)
-	OrderRoute(r, order)
-	VehicleRoute(r, vehicle)
+	// handling for metric
+	r.Handle("/metric", promHandler).Methods("GET")
+
+	UserRoute(r, user, observability)
+	OrderRoute(r, order, observability)
+	VehicleRoute(r, vehicle, observability)
 
 	host := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)
 	server := http.Server{
