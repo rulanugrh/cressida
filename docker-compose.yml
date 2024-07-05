@@ -60,7 +60,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./infrastructure/config.yml:/etc/prometheus/prometheus.yml
+      - ./infrastructure/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - cressida
 

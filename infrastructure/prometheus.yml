@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 10s # default for scrapping target
+
+scrape_configs:
+  # Job name for value to any timeseries
+- job_name: 'prometheus'
+
+  scrape_interval: 5s # override the global default scrapping targets
+
+  static_configs:
+    - targets: ['host.docker.internal:3000']
