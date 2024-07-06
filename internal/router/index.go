@@ -14,15 +14,12 @@ import (
 	"github.com/rulanugrh/cressida/internal/middleware"
 )
 
-func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler) {
+func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler, registry *prometheus.Registry, observability helper.Metric) {
 	cfg := config.GetConfig()
 
-	// register for observability
-	register := prometheus.NewRegistry()
-	observability := helper.NewPrometheus(register, nil)
 
 	// depend promhttp for collec with grafana and prometheus
-	promHandler := promhttp.HandlerFor(register, promhttp.HandlerOpts{})
+	promHandler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.Use(middleware.CORS)

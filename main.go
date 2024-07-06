@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rulanugrh/cressida/config"
 	"github.com/rulanugrh/cressida/internal/helper"
 	handler "github.com/rulanugrh/cressida/internal/http"
@@ -29,6 +30,12 @@ func main() {
 	// parsing connection for golang
 	mySQL := config.InitPostgreSQL()
 
+	// connection for register
+	register := prometheus.NewRegistry()
+
+	// register for observability
+	observability := helper.NewPrometheus(register, nil)
+
 	// create new variabel for repository
 	userRepository := repository.NewUserRepository(mySQL)
 	orderRepository := repository.NewOrderRepository(mySQL)
@@ -45,5 +52,5 @@ func main() {
 	orderHandler := handler.NewOrderHandler(orderService)
 
 	// parsing endpoint user
-	router.RouteEndpoint(userHandler, orderHandler, vehicleHandler)
+	router.RouteEndpoint(userHandler, orderHandler, vehicleHandler, register, observability)
 }
