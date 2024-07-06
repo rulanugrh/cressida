@@ -13,13 +13,13 @@ import (
 
 type Metric interface {
 	WrapHandler(name string, handler http.Handler) http.HandlerFunc
-	CounterUser(name string)
+	CounterUser(name string, conclusion string)
 	HistogramUser(name string, code string)
-	CounterOrder(name string)
+	CounterOrder(name string, conclusion string)
 	HistogramOrder(name string, code string)
-	CounterVehicle(name string)
+	CounterVehicle(name string, conclusion string)
 	HistogramVehicle(name string, code string)
-	CounterTransporter(name string)
+	CounterTransporter(name string, conclusion string)
 	HistogramTransporter(name string, code string)
 }
 
@@ -51,7 +51,7 @@ func NewPrometheus(register prometheus.Registerer, buckets []float64) Metric {
 		Namespace: "User Service",
 		Name:      "counter_request_user_per_function",
 		Help:      "Counter request user per function",
-	}, []string{"function"})
+	}, []string{"function", "type"})
 
 	userHistory := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "User Service",
@@ -63,7 +63,7 @@ func NewPrometheus(register prometheus.Registerer, buckets []float64) Metric {
 		Namespace: "Order Service",
 		Name:      "counter_request_order_per_function",
 		Help:      "Counter request order per function",
-	}, []string{"function"})
+	}, []string{"function", "type"})
 
 	orderHistory := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "Order Service",
@@ -75,7 +75,7 @@ func NewPrometheus(register prometheus.Registerer, buckets []float64) Metric {
 		Namespace: "Vehicle Service",
 		Name:      "counter_request_vehicle_per_function",
 		Help:      "Counter request vehicle per function",
-	}, []string{"function"})
+	}, []string{"function", "type"})
 
 	vehicleHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "Vehicle Service",
@@ -87,7 +87,7 @@ func NewPrometheus(register prometheus.Registerer, buckets []float64) Metric {
 		Namespace: "Vehicle Service",
 		Name:      "counter_request_transporter_per_function",
 		Help:      "Counter request transporter per function",
-	}, []string{"function"})
+	}, []string{"function", "type"})
 
 	transporterHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "Vehicle Service",
@@ -125,32 +125,32 @@ func NewPrometheus(register prometheus.Registerer, buckets []float64) Metric {
 
 }
 
-func (m *metric) CounterUser(name string) {
-	m.userCounter.WithLabelValues(name).Inc()
+func (m *metric) CounterUser(name string, conclusion string) {
+	m.userCounter.WithLabelValues(name, conclusion).Inc()
 }
 
 func (m *metric) HistogramUser(name string, code string) {
 	m.userHistogram.WithLabelValues(name, code).Observe(time.Since(time.Now()).Seconds())
 }
 
-func (m *metric) CounterOrder(name string) {
-	m.orderCounter.WithLabelValues(name).Inc()
+func (m *metric) CounterOrder(name string, conclusion string) {
+	m.orderCounter.WithLabelValues(name, conclusion).Inc()
 }
 
 func (m *metric) HistogramOrder(name string, code string) {
 	m.orderHistogram.WithLabelValues(name, code).Observe(time.Since(time.Now()).Seconds())
 }
 
-func (m *metric) CounterVehicle(name string) {
-	m.vehicleCounter.WithLabelValues(name).Inc()
+func (m *metric) CounterVehicle(name string, conclusion string) {
+	m.vehicleCounter.WithLabelValues(name, conclusion).Inc()
 }
 
 func (m *metric) HistogramVehicle(name string, code string) {
 	m.vehicleHistogram.WithLabelValues(name, code).Observe(time.Since(time.Now()).Seconds())
 }
 
-func (m *metric) CounterTransporter(name string) {
-	m.transporterCounter.WithLabelValues(name).Inc()
+func (m *metric) CounterTransporter(name string, conclusion string) {
+	m.transporterCounter.WithLabelValues(name, conclusion).Inc()
 }
 
 func (m *metric) HistogramTransporter(name string, code string) {

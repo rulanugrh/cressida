@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/rulanugrh/cressida/internal/entity/web"
+	"github.com/rulanugrh/cressida/internal/helper"
 	"github.com/rulanugrh/cressida/internal/middleware"
 	"github.com/rulanugrh/cressida/internal/service"
 )
@@ -27,11 +28,14 @@ type OrderHandler interface {
 type order struct {
 	service service.OrderService
 	middleware middleware.InterfaceJWT
+	observability helper.Metric
 }
 
-func NewOrderHandler(service service.OrderService) OrderHandler {
+func NewOrderHandler(service service.OrderService, observability helper.Metric) OrderHandler {
 	return &order{
 		service: service,
+		middleware: middleware.NewJSONWebToken(),
+		observability: observability,
 	}
 }
 
@@ -51,6 +55,12 @@ func(o *order) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	// checking user id
 	id, err := o.middleware.CheckUserID(r.Header.Get("Authorization"))
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("jwt_token", "unauthorized")
+
+		// depend histogram
+		o.observability.HistogramOrder("create_order", "401")
+
 		w.WriteHeader(401)
 		w.Write(web.Marshalling(web.Unauthorized("cannot get user id by token")))
 		return
@@ -62,6 +72,12 @@ func(o *order) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("create_order", "server_error")
+
+		// depend histogram
+		o.observability.HistogramOrder("create_order", "500")
+
 		w.WriteHeader(500)
 		w.Write(web.Marshalling(web.InternalServerError("sorry cannot decode request body")))
 		return
@@ -70,11 +86,22 @@ func(o *order) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	// parsing request in to service layer
 	data, err := o.service.CreateOrder(request)
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("create_order", "failure")
+
+		// depend histogram
+		o.observability.HistogramOrder("create_order", "400")
+
 		w.WriteHeader(400)
 		w.Write(web.Marshalling(web.BadRequest("sorry cannot create request order")))
 		return
 	}
 
+	// depend counter
+	o.observability.CounterOrder("create_order", "success")
+
+	// depend histogram
+	o.observability.HistogramOrder("create_order", "201")
 	w.WriteHeader(201)
 	w.Write(web.Marshalling(web.Created("success create order", data)))
 }
@@ -94,6 +121,12 @@ func(o *order) GetHistory(w http.ResponseWriter, r *http.Request) {
 	// get user id
 	id, err := o.middleware.CheckUserID(r.Header.Get("Authorization"))
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("jwt_token", "unauthorized")
+
+		// depend histogram
+		o.observability.HistogramOrder("get_history", "401")
+
 		w.WriteHeader(401)
 		w.Write(web.Marshalling(web.Unauthorized("sorry cannot get id user")))
 		return
@@ -102,10 +135,21 @@ func(o *order) GetHistory(w http.ResponseWriter, r *http.Request) {
 	// check history user
 	data, err := o.service.GetHistory(*id)
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("get_history", "failure")
+
+		// depend histogram
+		o.observability.HistogramOrder("get_history", "400")
 		w.WriteHeader(400)
 		w.Write(web.Marshalling(web.BadRequest("sorry history with this id not found")))
 		return
 	}
+
+	// depend counter
+	o.observability.CounterOrder("get_history", "success")
+
+	// depend histogram
+	o.observability.HistogramOrder("get_history", "200")
 
 	w.WriteHeader(200)
 	w.Write(web.Marshalling(web.Success("success get history", data)))
@@ -128,6 +172,11 @@ func(o *order) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	// checking is driver or admin
 	valid := o.middleware.ValidateAdminOrDriver(r.Header.Get("Authorization"))
 	if !valid {
+		// depend counter
+		o.observability.CounterOrder("jwt_token", "forbidden")
+
+		// depend histogram
+		o.observability.HistogramOrder("update_status", "403")
 		w.WriteHeader(403)
 		w.Write(web.Marshalling(web.Forbidden("sorry you are not admin or driver")))
 		return
@@ -137,6 +186,11 @@ func(o *order) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	var request web.UpdateOrderStatus
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("update_status", "server_error")
+
+		// depend histogram
+		o.observability.HistogramOrder("update_status", "500")
 		w.WriteHeader(500)
 		w.Write(web.Marshalling(web.InternalServerError("sorry cannot decode request body")))
 		return
@@ -145,11 +199,21 @@ func(o *order) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	// parsing value into service layer
 	data, err := o.service.UpdateStatus(request)
 	if err != nil {
+		// depend counter
+		o.observability.CounterOrder("update_status", "failure")
+
+		// depend histogram
+		o.observability.HistogramOrder("update_status", "400")
 		w.WriteHeader(400)
 		w.Write(web.Marshalling(web.BadRequest(fmt.Sprintf("cannot update status something error: %s", err.Error()))))
 		return
 	}
 
+	// depend counter
+	o.observability.CounterOrder("update_status", "success")
+
+	// depend histogram
+	o.observability.HistogramOrder("update_status", "200")
 	w.WriteHeader(200)
 	w.Write(web.Marshalling(web.Success("success update status", data)))
 }
@@ -176,6 +240,9 @@ func(o *order) GetOrderProcess(w http.ResponseWriter, r *http.Request) {
 	// checking is driver or admin
 	valid := o.middleware.ValidateAdminOrDriver(r.Header.Get("Authorization"))
 	if !valid {
+		// depend histogram
+		o.observability.HistogramOrder("jwt_token", "403")
+
 		w.WriteHeader(403)
 		w.Write(web.Marshalling(web.Forbidden("sorry you are not admin or driver")))
 		return
@@ -184,10 +251,16 @@ func(o *order) GetOrderProcess(w http.ResponseWriter, r *http.Request) {
 	// check from service layer
 	data, err := o.service.GetOrderProcess(per_page, page)
 	if err != nil {
+		// depend histogram
+		o.observability.HistogramOrder("get_order_process", "400")
+
 		w.WriteHeader(400)
 		w.Write(web.Marshalling(web.BadRequest("sorry cannot get order with status process")))
 		return
 	}
+
+	// depend histogram
+	o.observability.HistogramOrder("get_order_process", "200")
 
 	w.WriteHeader(200)
 	w.Write(web.Marshalling(web.Success("success get order with status process", data)))
@@ -212,6 +285,9 @@ func(o *order) GetOrder(w http.ResponseWriter, r *http.Request) {
 	// checking user id
 	id, err := o.middleware.CheckUserID(r.Header.Get("Authorization"))
 	if err != nil {
+		// depend histogram
+		o.observability.HistogramOrder("jwt_token", "401")
+
 		w.WriteHeader(401)
 		w.Write(web.Marshalling(web.Unauthorized("sorry cannot get user id, you must login first")))
 		return
@@ -220,10 +296,16 @@ func(o *order) GetOrder(w http.ResponseWriter, r *http.Request) {
 	// checking data from service layer
 	data, err := o.service.GetOrder(uuid, *id)
 	if err != nil {
+		// depend histogram
+		o.observability.HistogramOrder("get_order", "400")
+
 		w.WriteHeader(400)
 		w.Write(web.Marshalling(web.BadRequest("cannot get order with this uuid")))
 		return
 	}
+
+	// depend histogram
+	o.observability.HistogramOrder("get_order", "200")
 
 	w.WriteHeader(200)
 	w.Write(web.Marshalling(web.Success("success get order", data)))

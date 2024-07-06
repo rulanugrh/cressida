@@ -47,9 +47,9 @@ func main() {
 	orderService := service.NewOrderService(orderRepository, vehicleRepository)
 
 	// create new variabel for handler
-	userHandler := handler.NewUserHandler(userService)
-	vehicleHandler := handler.NewVehicleHandler(vehicleService)
-	orderHandler := handler.NewOrderHandler(orderService)
+	userHandler := handler.NewUserHandler(userService, observability)
+	vehicleHandler := handler.NewVehicleHandler(vehicleService, observability)
+	orderHandler := handler.NewOrderHandler(orderService, observability)
 
 	// parsing endpoint user
 	router.RouteEndpoint(userHandler, orderHandler, vehicleHandler, register, observability)
