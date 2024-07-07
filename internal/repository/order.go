@@ -17,6 +17,7 @@ type OrderRepository interface {
 	GetHistory(userID uint) (*[]domain.Order, error)
 	UpdateStatus(uuid string, status string) (*domain.Order, error)
 	CheckOrderProcess(perPage int, page int) (*[]domain.Order, error)
+	TakeOrder(uuid string) (*domain.Order, error)
 }
 
 type order struct {
@@ -124,4 +125,22 @@ func (o *order) CheckOrderProcess(perPage int, page int) (*[]domain.Order, error
 
 	o.log.Info("[REPOSITORY] - [CheckOrderProcess] success get order")
 	return &response, nil
+}
+
+func (o *order) TakeOrder(uuid string) (*domain.Order, error) {
+	var response domain.Order
+	err := o.conn.DB.Exec("UPDATE orders SET status = ? WHERE id = ?", "Confirmed", uuid).Error
+	if err != nil {
+		o.log.Error(fmt.Sprintf("[REPOSITORY] - [TakeOrder] %s", err.Error()))
+		return nil, err
+	}
+
+	err = o.conn.DB.Exec("SELECT * FROM orders WHERE id = ?", uuid).Preload("Transporter").Preload("Transporter.Driver").Find(&response).Error
+	if err != nil {
+		return nil, err
+	}
+
+	o.log.Info(fmt.Sprintf("[REPOSITORY] - [UpdateStatus] orderID: %s success take order", uuid))
+	return &response, nil
+
 }

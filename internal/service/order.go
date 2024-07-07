@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rulanugrh/cressida/internal/entity/domain"
 	"github.com/rulanugrh/cressida/internal/entity/web"
 	"github.com/rulanugrh/cressida/internal/helper"
 	"github.com/rulanugrh/cressida/internal/middleware"
@@ -24,20 +25,22 @@ type OrderService interface {
 }
 
 type order struct {
-	repository repository.OrderRepository
-	vehicle    repository.VehicleRepository
-	validate   middleware.IValidation
-	log        helper.ILog
-	trace helper.IOpenTelemetry
+	repository   repository.OrderRepository
+	vehicle      repository.VehicleRepository
+	validate     middleware.IValidation
+	log          helper.ILog
+	trace        helper.IOpenTelemetry
+	notification repository.NotificationRepository
 }
 
-func NewOrderService(repository repository.OrderRepository, vehicle repository.VehicleRepository) OrderService {
+func NewOrderService(repository repository.OrderRepository, vehicle repository.VehicleRepository, notification repository.NotificationRepository) OrderService {
 	return &order{
-		repository: repository,
-		vehicle:    vehicle,
-		validate:   middleware.NewValidation(),
-		log:        helper.NewLogger(),
-		trace: helper.NewOpenTelemetry(),
+		repository:   repository,
+		vehicle:      vehicle,
+		validate:     middleware.NewValidation(),
+		log:          helper.NewLogger(),
+		trace:        helper.NewOpenTelemetry(),
+		notification: notification,
 	}
 }
 
@@ -94,6 +97,9 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 		DropAddress:      data.DropAddress,
 		Description:      data.Description,
 	}
+
+	// create go routine for notification after create order
+	go o.notificationAfterCreateOrder(data)
 
 	o.log.Info(fmt.Sprintf("[SERVICE] - [CreateOrder] new order id %s append into db", data.ID.String()))
 	return &response, nil
@@ -201,6 +207,9 @@ func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse,
 		Description:      data.Description,
 	}
 
+	// start for notification after update order
+	go o.notificationUpdateStatusOrder(data)
+
 	o.log.Info(fmt.Sprintf("[SERVICE] - [UpdateStatus] order id %s success update status: %s", request.UUID, request.Status))
 	return &response, nil
 }
@@ -238,4 +247,52 @@ func (o *order) GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, er
 
 	o.log.Info("[SERVICE] - [GetOrderProcess] success get all order process")
 	return &response, nil
+}
+
+func (o *order) TakeOrder(uuid string) error {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "TakeOrder")
+	defer span.End()
+
+	// create request for take order
+	data, err := o.repository.TakeOrder(uuid)
+	if err != nil {
+		return web.BadRequest(err.Error())
+	}
+
+	// start for notification after take order
+	go o.notificationWhileDriverTakeOrder(data)
+
+	return nil
+}
+
+func (o *order) notificationAfterCreateOrder(req *domain.Order) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "notificationAfterCreateOrder")
+	defer span.End()
+
+	notification := domain.Notification{
+		UserID: req.UserID,
+		Content: "Transaction Succesfull",
+		Status: req.Status,
+		OrderID: req.ID.String(),
+	}
+
+	_ = o.notification.Insert(notification)
+}
+
+func (o *order) notificationUpdateStatusOrder(req *domain.Order) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "notificationUpdateStatusOrder")
+	defer span.End()
+
+	_ = o.notification.Update(req.ID.String(), req.Status)
+}
+
+func (o *order) notificationWhileDriverTakeOrder(req *domain.Order) {
+	// span for tracing request this endpoint
+	span := o.trace.StartTracer(context.Background(), "notificationWhileDriverTakeOrder")
+	defer span.End()
+
+	_ = o.notification.UpdateWhileTakeOrder(req.ID.String(), req.Status, req.Transporter.Driver.FName + " " +  req.Transporter.Driver.LName)
 }
