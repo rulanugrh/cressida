@@ -20,6 +20,7 @@ type Order struct {
 	DropCoordinate   string      `json:"drop_coordinate" from:"drop_coordinate"`
 	DropAddress      string      `json:"drop_address" from:"drop_address"`
 	Description      string      `json:"description" form:"description"`
+	TypePayment      string      `json:"type_payment" form:"type_payment"`
 	Status           string      `json:"status" form:"status"`
 	Transporter      Transporter `json:"transporter" form:"transporter" gorm:"foreignKey:TransporterID;references:ID"`
 	User             User        `json:"user" form:"user" gorm:"foreignKey:UserID;references:ID"`

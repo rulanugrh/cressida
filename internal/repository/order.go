@@ -47,6 +47,7 @@ func(o *order) CreateOrder(request web.OrderRequest) (*domain.Order, error) {
 		UserID: request.UserID,
 		Description: request.Description,
 		Status: "Process",
+		TypePayment: request.TypePayment,
 	}
 	err := o.conn.DB.Create(&response).Error
 

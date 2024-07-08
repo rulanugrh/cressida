@@ -200,6 +200,16 @@ func (o *order) OrderSuccess(uuid string) (*web.OrderResponse, error) {
 		Description:      data.Description,
 	}
 
+	tax := data.Transporter.Price * (0.11 * data.Transporter.Price)
+	_, _ = o.repository.SaveTransaction(domain.Transaction{
+		OrderID:     data.ID,
+		Weight:      data.Weight,
+		Distance:    data.Distance,
+		UserEmail:   data.User.Email,
+		Subtotal:    int64(data.Transporter.Price) + int64(tax),
+		TypePayment: data.TypePayment,
+	})
+
 	// start for notification after update order
 	go o.notificationUpdateStatusOrder(data)
 
@@ -266,18 +276,18 @@ func (o *order) notificationAfterCreateOrder(req *domain.Order) {
 
 	var data domain.NotificationStreamAfterCreateOrder
 	notification := domain.Notification{
-		UserID: req.UserID,
+		UserID:  req.UserID,
 		Content: "Transaction Succesfull",
-		Status: req.Status,
+		Status:  req.Status,
 		OrderID: req.ID.String(),
 	}
 
 	channel, oke := data.UserID[req.Transporter.DriverID]
 	if oke {
 		channel <- domain.Notification{
-			UserID: req.Transporter.DriverID,
+			UserID:  req.Transporter.DriverID,
 			Content: "New order incoming",
-			Status: req.Status,
+			Status:  req.Status,
 			OrderID: req.ID.String(),
 		}
 	}
@@ -295,7 +305,7 @@ func (o *order) notificationUpdateStatusOrder(req *domain.Order) {
 	if oke {
 		channel <- domain.NotificationUpdateOrder{
 			Content: "Order success, thank you for ordering me",
-			Status: req.Status,
+			Status:  req.Status,
 			OrderID: req.ID.String(),
 		}
 	}
@@ -311,12 +321,12 @@ func (o *order) notificationWhileDriverTakeOrder(req *domain.Order) {
 	channel, oke := data.UserID[req.UserID]
 	if oke {
 		channel <- domain.NotificationTakeOrder{
-			Content: "The order was successfully taken by the driver",
-			Status: req.Status,
-			OrderID: req.ID.String(),
+			Content:    "The order was successfully taken by the driver",
+			Status:     req.Status,
+			OrderID:    req.ID.String(),
 			DriverName: req.Transporter.Driver.FName + req.Transporter.Driver.LName,
 		}
 	}
 
-	_ = o.notification.UpdateWhileTakeOrder(req.ID.String(), req.Status, req.Transporter.Driver.FName + " " +  req.Transporter.Driver.LName)
+	_ = o.notification.UpdateWhileTakeOrder(req.ID.String(), req.Status, req.Transporter.Driver.FName+" "+req.Transporter.Driver.LName)
 }

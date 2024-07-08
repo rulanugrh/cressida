@@ -14,6 +14,7 @@ type OrderRequest struct {
 	DropLang         string `json:"drop_lang" from:"drop_lang" validate:"required"`
 	DropCoordinate   string `json:"drop_coordinate" from:"drop_coordinate" validate:"required"`
 	DropAddress      string `json:"drop_address" from:"drop_address" validate:"required"`
+	TypePayment      string `json:"type_payment" form:"type_payment" validate:"required"`
 }
 
 type OrderResponse struct {
@@ -40,6 +41,6 @@ type TransactionResponse struct {
 }
 
 type UpdateOrderStatus struct {
-	UUID string `json:"id" form:"id" validate:"required"`
+	UUID   string `json:"id" form:"id" validate:"required"`
 	Status string `json:"status" form:"status" validate:"required"`
 }
