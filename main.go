@@ -40,17 +40,20 @@ func main() {
 	userRepository := repository.NewUserRepository(mySQL)
 	orderRepository := repository.NewOrderRepository(mySQL)
 	vehicleRepository := repository.NewVehicleRepository(mySQL)
+	notificationRepository := repository.NewNotificationRepository(mySQL)
 
 	// create new variabel for service
 	userService := service.NewUserService(userRepository)
 	vehicleService := service.NewVehicleService(vehicleRepository)
-	orderService := service.NewOrderService(orderRepository, vehicleRepository)
+	notificationService := service.NewNotificationService(notificationRepository)
+	orderService := service.NewOrderService(orderRepository, vehicleRepository, notificationRepository)
 
 	// create new variabel for handler
 	userHandler := handler.NewUserHandler(userService, observability)
 	vehicleHandler := handler.NewVehicleHandler(vehicleService, observability)
 	orderHandler := handler.NewOrderHandler(orderService, observability)
+	notificationHandler := handler.NewNotificiationHandler(notificationService)
 
 	// parsing endpoint user
-	router.RouteEndpoint(userHandler, orderHandler, vehicleHandler, register, observability)
+	router.RouteEndpoint(userHandler, orderHandler, vehicleHandler, notificationHandler, register, observability)
 }

@@ -15,7 +15,7 @@ type OrderRepository interface {
 	GetOrder(uuid string, userID uint) (*domain.Order, error)
 	SaveTransaction(request domain.Transaction) (*domain.Transaction, error)
 	GetHistory(userID uint) (*[]domain.Order, error)
-	UpdateStatus(uuid string, status string) (*domain.Order, error)
+	OrderSuccess(uuid string) (*domain.Order, error)
 	CheckOrderProcess(perPage int, page int) (*[]domain.Order, error)
 	TakeOrder(uuid string) (*domain.Order, error)
 }
@@ -103,15 +103,21 @@ func(o *order) GetHistory(userID uint) (*[]domain.Order, error) {
 	return &response, nil
 }
 
-func (o *order) UpdateStatus(uuid string, status string) (*domain.Order, error) {
+func (o *order) OrderSuccess(uuid string) (*domain.Order, error) {
 	var response domain.Order
-	err := o.conn.DB.Exec("UPDATE orders SET status = ? WHERE id = ?", status, uuid).Preload("Transporter").Preload("User").Find(&response).Error
+	err := o.conn.DB.Exec("UPDATE orders SET status = ? WHERE id = ?", "Success", uuid).Error
 	if err != nil {
 		o.log.Error(fmt.Sprintf("[REPOSITORY] - [UpdateStatus] %s", err.Error()))
 		return nil, err
 	}
 
-	o.log.Info(fmt.Sprintf("[REPOSITORY] - [UpdateStatus] orderID: %s success update status with status: %s", uuid, status))
+	err = o.conn.DB.Exec("SELECT * FROM orders WHERE = ?", uuid).Preload("Transporter").Preload("User").Find(&response).Error
+	if err != nil {
+		o.log.Error(fmt.Sprintf("[REPOSITORY] - [UpdateStatus] %s", err.Error()))
+		return nil, err
+	}
+
+	o.log.Info(fmt.Sprintf("[REPOSITORY] - [UpdateStatus] orderID: %s success update status with status: %s", uuid, "Success"))
 	return &response, nil
 }
 

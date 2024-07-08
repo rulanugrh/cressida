@@ -21,7 +21,7 @@ type OrderService interface {
 	// interfce for get order with status process
 	GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, error)
 	// interface for update status
-	UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse, error)
+	OrderSuccess(uuid string) (*web.OrderResponse, error)
 }
 
 type order struct {
@@ -172,20 +172,13 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 	return &response, nil
 }
 
-func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse, error) {
+func (o *order) OrderSuccess(uuid string) (*web.OrderResponse, error) {
 	// span for tracing request this endpoint
 	span := o.trace.StartTracer(context.Background(), "UpdateStatus")
 	defer span.End()
 
-	// validate request struct
-	err := o.validate.Validate(request)
-	if err != nil {
-		o.log.Error(fmt.Sprintf("[SERVICE] - [UpdateStatus] Error while validate request: %s", err.Error()))
-		return nil, o.validate.ValidationMessage(err)
-	}
-
 	// get order by uuid and update status
-	data, err := o.repository.UpdateStatus(request.UUID, request.Status)
+	data, err := o.repository.OrderSuccess(uuid)
 	if err != nil {
 		o.log.Error(fmt.Sprintf("[SERVICE] - [UpdateStatus] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry you cant update status with this order uuid")
@@ -210,7 +203,7 @@ func (o *order) UpdateStatus(request web.UpdateOrderStatus) (*web.OrderResponse,
 	// start for notification after update order
 	go o.notificationUpdateStatusOrder(data)
 
-	o.log.Info(fmt.Sprintf("[SERVICE] - [UpdateStatus] order id %s success update status: %s", request.UUID, request.Status))
+	o.log.Info(fmt.Sprintf("[SERVICE] - [UpdateStatus] order id %s success update status: %s", uuid, data.Status))
 	return &response, nil
 }
 
@@ -271,11 +264,22 @@ func (o *order) notificationAfterCreateOrder(req *domain.Order) {
 	span := o.trace.StartTracer(context.Background(), "notificationAfterCreateOrder")
 	defer span.End()
 
+	var data domain.NotificationStreamAfterCreateOrder
 	notification := domain.Notification{
 		UserID: req.UserID,
 		Content: "Transaction Succesfull",
 		Status: req.Status,
 		OrderID: req.ID.String(),
+	}
+
+	channel, oke := data.UserID[req.Transporter.DriverID]
+	if oke {
+		channel <- domain.Notification{
+			UserID: req.Transporter.DriverID,
+			Content: "New order incoming",
+			Status: req.Status,
+			OrderID: req.ID.String(),
+		}
 	}
 
 	_ = o.notification.Insert(notification)
@@ -286,6 +290,15 @@ func (o *order) notificationUpdateStatusOrder(req *domain.Order) {
 	span := o.trace.StartTracer(context.Background(), "notificationUpdateStatusOrder")
 	defer span.End()
 
+	var data domain.NotificationStreamAfterUpdateOrder
+	channel, oke := data.UserID[req.UserID]
+	if oke {
+		channel <- domain.NotificationUpdateOrder{
+			Content: "Order success, thank you for ordering me",
+			Status: req.Status,
+			OrderID: req.ID.String(),
+		}
+	}
 	_ = o.notification.Update(req.ID.String(), req.Status)
 }
 
@@ -293,6 +306,17 @@ func (o *order) notificationWhileDriverTakeOrder(req *domain.Order) {
 	// span for tracing request this endpoint
 	span := o.trace.StartTracer(context.Background(), "notificationWhileDriverTakeOrder")
 	defer span.End()
+
+	var data domain.NotificationStreamAfterTakeOrder
+	channel, oke := data.UserID[req.UserID]
+	if oke {
+		channel <- domain.NotificationTakeOrder{
+			Content: "The order was successfully taken by the driver",
+			Status: req.Status,
+			OrderID: req.ID.String(),
+			DriverName: req.Transporter.Driver.FName + req.Transporter.Driver.LName,
+		}
+	}
 
 	_ = o.notification.UpdateWhileTakeOrder(req.ID.String(), req.Status, req.Transporter.Driver.FName + " " +  req.Transporter.Driver.LName)
 }

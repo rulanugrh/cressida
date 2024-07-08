@@ -18,7 +18,7 @@ type OrderHandler interface {
 	// interface for get history by user
 	GetHistory(w http.ResponseWriter, r *http.Request)
 	// interface for update status
-	UpdateStatus(w http.ResponseWriter, r *http.Request)
+	OrderSuccess(w http.ResponseWriter, r *http.Request)
 	// interface for get order with status process
 	GetOrderProcess(w http.ResponseWriter, r *http.Request)
 	// interface for get order with uuid and userid
@@ -157,18 +157,20 @@ func(o *order) GetHistory(w http.ResponseWriter, r *http.Request) {
 
 // Update Status Order
 // @Summary endpoint for update status order
-// @ID update_status
+// @ID order_success
 // @Tags orders
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param request body web.UpdateOrderStatus true "request body for update status"
+// @Param uuid query string true "query for uuid"
 // @Router /api/order/update/status [put]
 // @Success 200 {object} web.Response
 // @Failure 400 {object} web.Response
 // @Failure 403 {object} web.Response
-// @Failure 500 {object} web.Response
-func(o *order) UpdateStatus(w http.ResponseWriter, r *http.Request) {
+func(o *order) OrderSuccess(w http.ResponseWriter, r *http.Request) {
+	// create query for uuid
+	uuid := r.URL.Query().Get("uuid")
+
 	// checking is driver or admin
 	valid := o.middleware.ValidateAdminOrDriver(r.Header.Get("Authorization"))
 	if !valid {
@@ -176,44 +178,31 @@ func(o *order) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		o.observability.CounterOrder("jwt_token", "forbidden")
 
 		// depend histogram
-		o.observability.HistogramOrder("update_status", "403")
+		o.observability.HistogramOrder("order_success", "403")
 		w.WriteHeader(403)
 		w.Write(web.Marshalling(web.Forbidden("sorry you are not admin or driver")))
 		return
 	}
 
-	// decode request body
-	var request web.UpdateOrderStatus
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		// depend counter
-		o.observability.CounterOrder("update_status", "server_error")
-
-		// depend histogram
-		o.observability.HistogramOrder("update_status", "500")
-		w.WriteHeader(500)
-		w.Write(web.Marshalling(web.InternalServerError("sorry cannot decode request body")))
-		return
-	}
 
 	// parsing value into service layer
-	data, err := o.service.UpdateStatus(request)
+	data, err := o.service.OrderSuccess(uuid)
 	if err != nil {
 		// depend counter
-		o.observability.CounterOrder("update_status", "failure")
+		o.observability.CounterOrder("order_success", "failure")
 
 		// depend histogram
-		o.observability.HistogramOrder("update_status", "400")
+		o.observability.HistogramOrder("order_success", "400")
 		w.WriteHeader(400)
 		w.Write(web.Marshalling(web.BadRequest(fmt.Sprintf("cannot update status something error: %s", err.Error()))))
 		return
 	}
 
 	// depend counter
-	o.observability.CounterOrder("update_status", "success")
+	o.observability.CounterOrder("order_success", "success")
 
 	// depend histogram
-	o.observability.HistogramOrder("update_status", "200")
+	o.observability.HistogramOrder("order_success", "200")
 	w.WriteHeader(200)
 	w.Write(web.Marshalling(web.Success("success update status", data)))
 }

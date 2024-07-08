@@ -11,10 +11,9 @@ import (
 	"github.com/rulanugrh/cressida/config"
 	"github.com/rulanugrh/cressida/internal/helper"
 	handler "github.com/rulanugrh/cressida/internal/http"
-	"github.com/rulanugrh/cressida/internal/middleware"
 )
 
-func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler, registry *prometheus.Registry, observability helper.Metric) {
+func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler, nofitication handler.NotificationHandler,registry *prometheus.Registry, observability helper.Metric) {
 	cfg := config.GetConfig()
 
 
@@ -22,14 +21,15 @@ func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle
 	promHandler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 
 	r := mux.NewRouter().StrictSlash(true)
-	r.Use(middleware.CORS)
 
 	// handling for metric
 	r.Handle("/metric", promHandler).Methods("GET")
+	r.HandleFunc("/api/notification/", nofitication.GetAllNotificationByUserID).Methods("GET")
 
 	UserRoute(r, user, observability)
 	OrderRoute(r, order, observability)
 	VehicleRoute(r, vehicle, observability)
+	SSERoute(r, nofitication)
 
 	host := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)
 	server := http.Server{
