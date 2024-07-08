@@ -22,19 +22,19 @@ Cressida about a project, where this project create API service transporter. In 
 
 ## Installation
 first, clone this repository
-```
+```bash
 $ git clone https://github.com/rulanugrh/cressida.git
 ```
 
 after that you can running `make install_depedency_[YOUR-OS]`
-```
+```bash
 $ make install_depedency_mac
 
 # linux
 $ make install_depedency_linux
 ```
 and then, you can run this command
-```
+```bash
 $ make up
 ```
 
