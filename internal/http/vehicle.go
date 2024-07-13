@@ -212,7 +212,7 @@ func (v *vehicle) GetAllVehicle(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
-// @Param request body web.TranspoterRequest true "request body for add transporter"
+// @Param request body web.TransporterRequest true "request body for add transporter"
 // @Router /api/transporters/add [post]
 // @Success 201 {object} web.Response
 // @Failure 401 {object} web.Response

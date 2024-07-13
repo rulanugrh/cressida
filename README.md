@@ -38,4 +38,4 @@ and then, you can run this command
 $ make up
 ```
 
-> Note: this project on progress
+> Docs: http://[ip]:[port]/docs/

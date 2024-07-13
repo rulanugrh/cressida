@@ -11,7 +11,23 @@ import (
 	"github.com/rulanugrh/cressida/config"
 	"github.com/rulanugrh/cressida/internal/helper"
 	handler "github.com/rulanugrh/cressida/internal/http"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+// @version 1.1.0
+// @title API Transporter with PostgreSQL
+// @description Implement collect metric with prometheus and tracing with jaeger
+
+// @BasePath /api/
+// @host localhost:8080
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @security ApiKeyAuth
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
 
 func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler, nofitication handler.NotificationHandler,registry *prometheus.Registry, observability helper.Metric) {
 	cfg := config.GetConfig()
@@ -25,6 +41,12 @@ func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle
 	// handling for metric
 	r.Handle("/metric", promHandler).Methods("GET")
 	r.HandleFunc("/api/notification/", nofitication.GetAllNotificationByUserID).Methods("GET")
+	r.PathPrefix("/docs/*").Handler(httpSwagger.Handler(
+		httpSwagger.URL(cfg.Server.URLDocs),
+		httpSwagger.DeepLinking(true),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	)).Methods("GET")
 
 	UserRoute(r, user, observability)
 	OrderRoute(r, order, observability)

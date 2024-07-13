@@ -257,7 +257,7 @@ func(o *order) GetOrderProcess(w http.ResponseWriter, r *http.Request) {
 
 // Get Order by UUID
 // @Summary endpoint for get order process
-// @ID get_order_process
+// @ID get_order_by_uuid
 // @Tags orders
 // @Accept json
 // @Produce json

@@ -16,9 +16,10 @@ type App struct {
 	}
 
 	Server struct {
-		Host   string
-		Port   string
-		Secret string
+		Host    string
+		Port    string
+		Secret  string
+		URLDocs string
 	}
 
 	Opentelemetry struct {
@@ -60,6 +61,7 @@ func initConfig() *App {
 	conf.Server.Secret = os.Getenv("SERVER_SECRET")
 	conf.Server.Host = os.Getenv("SERVER_HOST")
 	conf.Server.Port = os.Getenv("SERVER_PORT")
+	conf.Server.URLDocs = os.Getenv("SERVER_URL_DOCS")
 
 	conf.Opentelemetry.Host = os.Getenv("OPENTELEMETRY_HOST")
 	conf.Opentelemetry.Port = os.Getenv("OPENTELEMETRY_PORT")

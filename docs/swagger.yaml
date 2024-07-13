@@ -1,0 +1,557 @@
+definitions:
+  web.Login:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  web.OrderRequest:
+    properties:
+      description:
+        type: string
+      distance:
+        type: integer
+      drop_address:
+        type: string
+      drop_coordinate:
+        type: string
+      drop_lang:
+        type: string
+      drop_lat:
+        type: string
+      pickup_address:
+        type: string
+      pickup_coordinate:
+        type: string
+      pickup_lang:
+        type: string
+      pickup_lat:
+        type: string
+      transporter_id:
+        type: integer
+      type_payment:
+        type: string
+      user_id:
+        type: integer
+      weight:
+        type: integer
+    required:
+    - description
+    - distance
+    - drop_address
+    - drop_coordinate
+    - drop_lang
+    - drop_lat
+    - pickup_address
+    - pickup_coordinate
+    - pickup_lang
+    - pickup_lat
+    - transporter_id
+    - type_payment
+    - user_id
+    - weight
+    type: object
+  web.Register:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      f_name:
+        type: string
+      l_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+      role_id:
+        type: integer
+    required:
+    - address
+    - email
+    - f_name
+    - l_name
+    - password
+    - phone
+    type: object
+  web.Response:
+    properties:
+      code:
+        type: integer
+      data:
+        type: object
+      msg:
+        type: string
+    type: object
+  web.TransporterRequest:
+    properties:
+      driver_id:
+        type: integer
+      max_distance:
+        type: integer
+      max_weight:
+        type: integer
+      price:
+        type: number
+      type_vehicle:
+        type: integer
+    required:
+    - driver_id
+    - max_distance
+    - max_weight
+    - price
+    - type_vehicle
+    type: object
+  web.VehicleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+info:
+  contact: {}
+paths:
+  /api/order/create:
+    post:
+      consumes:
+      - application/json
+      operationId: create_order
+      parameters:
+      - description: request body for create order
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/web.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: endpoint for create order
+      tags:
+      - orders
+  /api/order/find/{uuid}:
+    get:
+      consumes:
+      - application/json
+      operationId: get_order_by_uuid
+      parameters:
+      - description: UUID order data
+        in: query
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: endpoint for get order process
+      tags:
+      - orders
+  /api/order/history:
+    get:
+      consumes:
+      - application/json
+      operationId: get_history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: endpoint for get history order
+      tags:
+      - orders
+  /api/order/process:
+    get:
+      consumes:
+      - application/json
+      operationId: get_order_process
+      parameters:
+      - description: Per page for get data
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: Page for get data
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: endpoint for get order process
+      tags:
+      - orders
+  /api/order/update/status:
+    put:
+      consumes:
+      - application/json
+      operationId: order_success
+      parameters:
+      - description: query for uuid
+        in: query
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: endpoint for update status order
+      tags:
+      - orders
+  /api/transporters/add:
+    post:
+      consumes:
+      - application/json
+      operationId: create_transporter
+      parameters:
+      - description: request body for add transporter
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.TransporterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/web.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/web.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: save transporter into db
+      tags:
+      - transporters
+  /api/transporters/find/{id}:
+    get:
+      consumes:
+      - application/json
+      operationId: get_transporter_byd_id
+      parameters:
+      - description: Vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: get transporter by id
+      tags:
+      - transporters
+  /api/transporters/get:
+    get:
+      consumes:
+      - application/json
+      operationId: get_all_transporter
+      parameters:
+      - description: Per page for get data
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: Page for get data
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: get all transporter
+      tags:
+      - transporters
+  /api/user/getme:
+    get:
+      consumes:
+      - application/json
+      operationId: getme
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: get detail account
+      tags:
+      - users
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      operationId: login
+      parameters:
+      - description: request body for login user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: login account
+      tags:
+      - users
+  /api/user/register:
+    post:
+      consumes:
+      - application/json
+      operationId: register
+      parameters:
+      - description: request body for register new user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.Register'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: register new account
+      tags:
+      - users
+  /api/vehicles/add:
+    post:
+      consumes:
+      - application/json
+      operationId: create_vehicle
+      parameters:
+      - description: request body for add vehicle
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.VehicleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/web.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/web.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: save vehicle into db
+      tags:
+      - vehicles
+  /api/vehicles/find/{id}:
+    get:
+      consumes:
+      - application/json
+      operationId: get_vehicle_by_id
+      parameters:
+      - description: Vehicle ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: get vehicle by id
+      tags:
+      - vehicles
+  /api/vehicles/get:
+    get:
+      consumes:
+      - application/json
+      operationId: get_all_vehicle
+      parameters:
+      - description: Per page for get data
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: Page for get data
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: get all vehicle
+      tags:
+      - vehicles
+swagger: "2.0"
