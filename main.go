@@ -13,6 +13,20 @@ import (
 	"github.com/rulanugrh/cressida/internal/service"
 )
 
+// @version 1.1.0
+// @title API Transporter with PostgreSQL
+// @description Implement collect metric with prometheus and tracing with jaeger
+
+// @BasePath /api/
+// @host localhost:8080
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @security ApiKeyAuth
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
 func main() {
 	// parsing connection opentelemetry
 	opentelemetry, err := helper.InitTracer()

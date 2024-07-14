@@ -14,21 +14,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// @version 1.1.0
-// @title API Transporter with PostgreSQL
-// @description Implement collect metric with prometheus and tracing with jaeger
-
-// @BasePath /api/
-// @host localhost:8080
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-// @security ApiKeyAuth
-
-// @license.name MIT
-// @license.url https://opensource.org/licenses/MIT
-
 func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler, nofitication handler.NotificationHandler,registry *prometheus.Registry, observability helper.Metric) {
 	cfg := config.GetConfig()
 

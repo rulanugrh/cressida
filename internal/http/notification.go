@@ -31,6 +31,17 @@ func NewNotificiationHandler(service service.NotificationService) NotificationHa
 	return &notification{service: service, middleware: middleware.NewJSONWebToken()}
 }
 
+// Get Notificiation By UserID
+// @Summary endpoint for get notification by userID
+// @ID get_notification_by_user_id
+// @Tags notifications
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /api/notification/ [get]
+// @Success 200 {object} web.Response
+// @Failure 401 {object} web.Response
+// @Failure 404 {object} web.Response
 func(n *notification) GetAllNotificationByUserID(w http.ResponseWriter, r *http.Request) {
 	// get user id
 	userID, err := n.middleware.CheckUserID(r.Header.Get("Authorization"))
@@ -52,6 +63,15 @@ func(n *notification) GetAllNotificationByUserID(w http.ResponseWriter, r *http.
 	w.Write(web.Marshalling(web.Success("success get notification", data)))
 }
 
+// Server Send Event New Order
+// @Summary endpoint for sse new order
+// @ID sse_new_order
+// @Tags notifications
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /api/notif-stream/new-order [get]
+// @Success 200 {string} string "notification-create-order"
 func(n *notification) StreamNotificationAfterCreate(w http.ResponseWriter, r *http.Request) {
 	var data domain.NotificationStreamAfterCreateOrder
 
@@ -74,6 +94,15 @@ func(n *notification) StreamNotificationAfterCreate(w http.ResponseWriter, r *ht
 	}
 }
 
+// Server Send Event Take Order
+// @Summary endpoint for sse take order
+// @ID sse_take_order
+// @Tags notifications
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /api/notif-stream/take-order [get]
+// @Success 200 {string} string "notification-take-order"
 func(n *notification) StreamNotificationAfterTaking(w http.ResponseWriter, r *http.Request) {
 	var data domain.NotificationStreamAfterTakeOrder
 
@@ -95,6 +124,15 @@ func(n *notification) StreamNotificationAfterTaking(w http.ResponseWriter, r *ht
 	}
 }
 
+// Server Send Event Order Success
+// @Summary endpoint for sse order success
+// @ID sse_order_success
+// @Tags notifications
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /api/notif-steream/order-success [get]
+// @Success 200 {string} string "notification-order-order"
 func(n *notification) StreamNotificationAfterUpdateOrder(w http.ResponseWriter, r *http.Request) {
 	var data domain.NotificationStreamAfterUpdateOrder
 
