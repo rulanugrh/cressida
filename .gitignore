@@ -29,3 +29,7 @@ go.sum
 .env
 .env.dev
 .env.prod
+
+# load_test node_modules
+test/load_test/node_modules
+test/load_test/node_modules/*
