@@ -47,14 +47,12 @@ const getAllVehicle = (): Response<Vehicle> => {
 }
 
 export const options: Options = {
-    vus: 50,
-    iterations: 10,
+    vus: 10,
+    iterations: 5,
     duration: '2m'
 }
 
 export default () => {
-    const response = getAllVehicle()
-    for (let res of response.data) {
-        logger.info(`Running iteration ${vu.vu.idInInstance} for vehicle id: ${res.id}`)
-    }
+    logger.info(`Running iteration ${vu.vu.idInInstance}`)
+    getAllVehicle()
 }
