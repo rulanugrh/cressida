@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p .",
-    "test:getVehicleByID": "k6 run build/src/get-vehicle-by-id.js -a localhost:6556"
+    "test:getVehicleByID": "k6 run build/src/get-vehicle-by-id.js -a localhost:6556",
+    "test:getAllVehicle": "k6 run build/src/get-all-vehicle.js -a localhost:6556"
   },
   "repository": {
     "type": "git",
