@@ -67,8 +67,8 @@ func(n *notification) GetAllNotificationByUserID(w http.ResponseWriter, r *http.
 // @Summary endpoint for sse new order
 // @ID sse_new_order
 // @Tags notifications
-// @Accept json
-// @Produce json
+// @Accept json-stream
+// @Produce json-stream
 // @Security ApiKeyAuth
 // @Router /api/notif-stream/new-order [get]
 // @Success 200 {string} string "notification-create-order"
@@ -98,8 +98,8 @@ func(n *notification) StreamNotificationAfterCreate(w http.ResponseWriter, r *ht
 // @Summary endpoint for sse take order
 // @ID sse_take_order
 // @Tags notifications
-// @Accept json
-// @Produce json
+// @Accept json-stream
+// @Produce json-stream
 // @Security ApiKeyAuth
 // @Router /api/notif-stream/take-order [get]
 // @Success 200 {string} string "notification-take-order"
@@ -128,10 +128,10 @@ func(n *notification) StreamNotificationAfterTaking(w http.ResponseWriter, r *ht
 // @Summary endpoint for sse order success
 // @ID sse_order_success
 // @Tags notifications
-// @Accept json
-// @Produce json
+// @Accept json-stream
+// @Produce json-stream
 // @Security ApiKeyAuth
-// @Router /api/notif-steream/order-success [get]
+// @Router /api/notif-stream/order-success [get]
 // @Success 200 {string} string "notification-order-order"
 func(n *notification) StreamNotificationAfterUpdateOrder(w http.ResponseWriter, r *http.Request) {
 	var data domain.NotificationStreamAfterUpdateOrder

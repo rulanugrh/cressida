@@ -27,10 +27,10 @@ const docTemplate = `{
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "tags": [
                     "notifications"
@@ -55,10 +55,10 @@ const docTemplate = `{
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "tags": [
                     "notifications"
@@ -83,10 +83,10 @@ const docTemplate = `{
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "tags": [
                     "notifications"

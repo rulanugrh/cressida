@@ -2,7 +2,7 @@
 ![banner](.github/thumb.png)
 
 ## Description
-Cressida about a project, where this project create API service transporter. In this project has implementation opentelemetry for tracing endpoint / function and collect some metric ( gauge, summary, histogram ) per endpoint. This project use golang with [gorilla](https://github.com/gorilla/mux) for route HTTP endpoint
+Cressida about a project, where this project create API service transporter. In this project has implementation opentelemetry for tracing endpoint / function and collect some metric ( gauge, summary, histogram ) per endpoint. This project use golang with [gorilla](https://github.com/gorilla/mux) for route HTTP endpoint. Go to `http://[ip]:[port]/docs/` for detail documentation API
 
 ## Requirements
 - [Go](https://golang.org/) 1.18 or higher
@@ -38,4 +38,33 @@ and then, you can run this command
 $ make up
 ```
 
-> Docs: http://[ip]:[port]/docs/
+## Load Test
+#### Vehicle
+```bash
+# for load test vehicle by id
+$ make load_test_get_vehicle_by_id
+
+# for load test get all vehicle
+$ make load_test_get_all_vehicle
+
+# for load test post vehicle
+$ make load_test_post_vehicle
+```
+
+#### Transporter
+```bash
+# for load test transporter by id
+$ make load_test_get_transporter_by_id
+
+# for load test get all transporter
+$ make load_test_get_all_transporter
+
+# for load test post transporter
+$ make load_test_post_transporter
+```
+
+#### User
+```bash
+# for load test user register
+$ make load_test_user_register
+```

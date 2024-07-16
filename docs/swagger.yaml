@@ -132,10 +132,10 @@ paths:
   /api/notif-steream/order-success:
     get:
       consumes:
-      - application/json
+      - application/x-json-stream
       operationId: sse_order_success
       produces:
-      - application/json
+      - application/x-json-stream
       responses:
         "200":
           description: notification-order-order
@@ -149,10 +149,10 @@ paths:
   /api/notif-stream/new-order:
     get:
       consumes:
-      - application/json
+      - application/x-json-stream
       operationId: sse_new_order
       produces:
-      - application/json
+      - application/x-json-stream
       responses:
         "200":
           description: notification-create-order
@@ -166,10 +166,10 @@ paths:
   /api/notif-stream/take-order:
     get:
       consumes:
-      - application/json
+      - application/x-json-stream
       operationId: sse_take_order
       produces:
-      - application/json
+      - application/x-json-stream
       responses:
         "200":
           description: notification-take-order

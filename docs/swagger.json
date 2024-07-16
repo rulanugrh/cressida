@@ -21,10 +21,10 @@
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "tags": [
                     "notifications"
@@ -49,10 +49,10 @@
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "tags": [
                     "notifications"
@@ -77,10 +77,10 @@
                     }
                 ],
                 "consumes": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/x-json-stream"
                 ],
                 "tags": [
                     "notifications"
