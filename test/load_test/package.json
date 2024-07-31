@@ -8,7 +8,12 @@
     "build": "tsc -p .",
     "test:getVehicleByID": "k6 run build/src/get-vehicle-by-id.js -a localhost:6556",
     "test:getAllVehicle": "k6 run build/src/get-all-vehicle.js -a localhost:6556",
-    "test:createVehicle": "k6 run build/src/post-vehicle.js -a localhost:6556"
+    "test:createVehicle": "k6 run build/src/post-vehicle.js -a localhost:6556",
+    "test:getAllTransporter": "k6 run build/src/get-all-transporter.js -a localhost:6556",
+    "test:getTransporterByID": "k6 run build/src/get-transporter-by-id.js -a localhost:6556",
+    "test:createTransporter": "k6 run build/src/post-transporter.js -a localhost:6556",
+    "test:userRegister": "k6 run build/src/user-register.js -a localhost:6556"
+
   },
   "repository": {
     "type": "git",

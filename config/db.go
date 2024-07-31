@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"log"
 
@@ -39,6 +40,19 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 	if err != nil {
 		log.Printf("Error while connect to DB %s", err.Error())
 	}
+
+	// set max connection pool
+	sql, err := db.DB()
+	if err != nil {
+		log.Printf("Error while set DB %s", err.Error())
+	}
+
+	// max open connection
+	sql.SetMaxOpenConns(100)
+	// max idle connection
+	sql.SetMaxIdleConns(2)
+	// max lifetime
+	sql.SetConnMaxLifetime(time.Now().Sub(time.Now().Add(time.Minute * 30)))
 
 	conn.DB = db
 	return db
