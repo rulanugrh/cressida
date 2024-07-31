@@ -46,7 +46,7 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 	db.Use(prometheus.New(prometheus.Config{
 		DBName: "cresida_db",
 		RefreshInterval: 15,
-		HTTPServerPort: 8080,
+		HTTPServerPort: 3000,
 		MetricsCollector: []prometheus.MetricsCollector{
 			&prometheus.Postgres{
 				VariableNames: []string{"threads_running"},
