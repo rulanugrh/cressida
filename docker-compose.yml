@@ -71,6 +71,8 @@ services:
       - 3000:3000
     networks:
       - cressida
+    volumes:
+      - ./infrastructure/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
     depends_on:
       - prometheus-cressida
 
