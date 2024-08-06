@@ -11,6 +11,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/plugin/prometheus"
+	"github.com/rulanugrh/cressida/entity/domain"
 )
 
 type SDatabase struct {
@@ -70,4 +71,10 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 
 	conn.DB = db
 	return db
+}
+
+
+func (conn *SDatabase) Migration() {
+	// migration all struct
+	conn.DB.AutoMigration(&domain.Role{}, &domain.User{}, &domain.Vehicle{}, &domain.Transporter{}, &domain.Driver{}, &domain.Order{}, &domain.Transaction{})
 }

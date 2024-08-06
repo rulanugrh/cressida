@@ -6,7 +6,7 @@ type Vehicle struct {
 	gorm.Model
 	Name         string        `json:"name" form:"name"`
 	Description  string        `json:"description" form:"description"`
-	Transporters []Transporter `json:"transporter" form:"transporter"`
+	Transporters []Transporter `json:"transporter" form:"transporter" gorm:"many2many:record_transporter_by_vehicle"`
 }
 
 type Transporter struct {

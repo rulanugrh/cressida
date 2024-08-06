@@ -18,7 +18,7 @@ type Role struct {
 	gorm.Model
 	Name        string `json:"name" form:"name"`
 	Description string `json:"description" form:"description"`
-	User        []User `json:"user" form:"user"`
+	User        []User `json:"user" form:"user" gorm:"many2many:user_role"`
 }
 
 type Driver struct {
@@ -32,5 +32,5 @@ type Driver struct {
 	KTP          string        `json:"ktp" form:"ktp"`
 	SIM          string        `json:"sim" form:"sim"`
 	Profile      string        `json:"profile" form:"profile"`
-	Transporters []Transporter `json:"transporter"`
+	Transporters []Transporter `json:"transporter" gorm:"many2many:driver_transporter"`
 }

@@ -44,6 +44,9 @@ func main() {
 	// parsing connection for golang
 	mySQL := config.InitPostgreSQL()
 
+	// running migration
+	mySQL.Migration()
+
 	// connection for register
 	register := prometheus.NewRegistry()
 

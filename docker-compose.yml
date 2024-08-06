@@ -9,7 +9,7 @@ services:
       - POSTGRES_USER=${POSTGRESQL_USER}
       - POSTGRES_PASSWORD=${POSTGRESQL_PASS}
     ports:
-      - 127.0.0.1:{POSTGRESQL_PORT}:5432
+      - 127.0.0.1:${POSTGRESQL_PORT}:5432
     networks:
       - cressida
 
@@ -19,19 +19,20 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - APP_PORT=${APP_PORT}
+        - APP_PORT=${SERVER_PORT}
     environment:
-      - APP_PORT=${APP_PORT}
-      - APP_HOST=${APP_HOST}
+      - APP_PORT=${SERVER_PORT}
+      - APP_HOST=${SERVER_HOST}
       - POSTGRESQL_NAME=${POSTGRESQL_NAME}
       - POSTGRESQL_PASS=${POSTGRESQL_PASS}
       - POSTGRESQL_PORT=${POSTGRESQL_PORT}
       - POSTGRESQL_USER=${POSTGRESQL_USER}
-      - APP_SECRET=${APP_SECRET}
+      - APP_SECRET=${SERVER_SECRET}
+      - SERVER_URL_DOCS=${SERVER_URL_DOCS}
       - OPENTELEMETRY_HOST=${OPENTELEMETRY_HOST}
       - OPENTELEMETRY_PORT=${OPENTELEMETRY_PORT}
     ports:
-      - 4000:${APP_PORT}
+      - 4000:${SERVER_PORT}
     networks:
       - cressida
     depends_on:
