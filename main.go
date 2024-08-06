@@ -47,6 +47,9 @@ func main() {
 	// running migration
 	mySQL.Migration()
 
+	// running seeder
+	mySQL.Seeder()
+
 	// connection for register
 	register := prometheus.NewRegistry()
 

@@ -7,11 +7,12 @@ import (
 
 	"log"
 
+	"github.com/rulanugrh/cressida/internal/entity/domain"
 	"github.com/rulanugrh/cressida/internal/helper"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/plugin/prometheus"
-	"github.com/rulanugrh/cressida/entity/domain"
 )
 
 type SDatabase struct {
@@ -76,5 +77,45 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 
 func (conn *SDatabase) Migration() {
 	// migration all struct
-	conn.DB.AutoMigration(&domain.Role{}, &domain.User{}, &domain.Vehicle{}, &domain.Transporter{}, &domain.Driver{}, &domain.Order{}, &domain.Transaction{})
+	conn.DB.AutoMigrate(&domain.Role{}, &domain.User{}, &domain.Vehicle{}, &domain.Transporter{}, &domain.Driver{}, &domain.Order{}, &domain.Transaction{})
+}
+
+func (conn *SDatabase) Seeder() {
+	// seeder for role
+
+	cfg := GetConfig()
+
+	roleAdmin := domain.Role{ Name: "Admin", Description: "This is role administrator"}
+	roleDrive := domain.Role{ Name: "Driver", Description: "This is role driver"}
+	roleUser := domain.Role{ Name: "User", Description: "This is role user"}
+
+	findRoleAdmin := conn.DB.Where("name = ?", roleAdmin.Name)
+	if findRoleAdmin.RowsAffected < 0 {
+		findRoleAdmin.Create(&roleAdmin)
+	}
+
+	findRoleDriver := conn.DB.Where("name = ?", roleDrive.Name)
+	if findRoleDriver.RowsAffected < 0 {
+		findRoleDriver.Create(&roleDrive)
+	}
+
+	findRoleUser := conn.DB.Where("name = ?", roleUser.Name)
+	if findRoleUser.RowsAffected < 0 {
+		findRoleUser.Create(&roleUser)
+	}
+
+	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(cfg.Admin.Password), 14)
+	userAdmin := domain.User{
+		FName: "Admin",
+		LName: "Cressida",
+		Email: cfg.Admin.Email,
+		Password: string(hashPassword),
+		RoleID: 1,
+		Address: "-",
+		Phone: "-",
+	}
+
+	if findUserAdmin := conn.DB.Where("email = ?", cfg.Admin.Email); findUserAdmin.RowsAffected < 0 {
+		findUserAdmin.Create(&userAdmin)
+	}
 }
