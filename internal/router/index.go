@@ -24,7 +24,7 @@ func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle
 	r := mux.NewRouter().StrictSlash(true)
 
 	// handling for metric
-	r.Handle("/metric", promHandler).Methods("GET")
+	r.Handle("/metrics", promHandler).Methods("GET")
 	r.HandleFunc("/api/notification/", nofitication.GetAllNotificationByUserID).Methods("GET")
 	r.PathPrefix("/docs/*").Handler(httpSwagger.Handler(
 		httpSwagger.URL(cfg.Server.URLDocs),

@@ -43,12 +43,14 @@ func main() {
 
 	// parsing connection for golang
 	mySQL := config.InitPostgreSQL()
+	db := mySQL.DatabaseConnection()
 
 	// running migration
-	mySQL.Migration()
+	config.Migration(db)
 
 	// running seeder
-	mySQL.Seeder()
+	errs := config.Seeder(db)
+	log.Println(errs)
 
 	// connection for register
 	register := prometheus.NewRegistry()

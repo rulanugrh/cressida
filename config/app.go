@@ -54,6 +54,8 @@ func initConfig() *App {
 		conf.Server.Host = ""
 		conf.Server.Port = ""
 		conf.Server.Secret = ""
+		conf.Admin.Email = ""
+		conf.Admin.Password = ""
 		return &conf
 	}
 

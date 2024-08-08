@@ -31,7 +31,7 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 
 	cfg := GetConfig()
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
 		cfg.Database.User,
 		cfg.Database.Pass,
 		cfg.Database.Host,
@@ -47,8 +47,8 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 	// use plugin for prometheus
 	db.Use(prometheus.New(prometheus.Config{
 		DBName: "cresida_db",
-		RefreshInterval: 15,
-		HTTPServerPort: 3000,
+		RefreshInterval: 5,
+		HTTPServerPort: 4000,
 		MetricsCollector: []prometheus.MetricsCollector{
 			&prometheus.Postgres{
 				VariableNames: []string{"threads_running"},
@@ -75,12 +75,13 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 }
 
 
-func (conn *SDatabase) Migration() {
+func Migration(db *gorm.DB) {
 	// migration all struct
-	conn.DB.AutoMigrate(&domain.Role{}, &domain.User{}, &domain.Vehicle{}, &domain.Transporter{}, &domain.Driver{}, &domain.Order{}, &domain.Transaction{})
+	err := db.AutoMigrate(&domain.Role{}, &domain.User{}, &domain.Vehicle{}, &domain.Transporter{}, &domain.Driver{}, &domain.Order{}, &domain.Transaction{})
+	fmt.Println(err)
 }
 
-func (conn *SDatabase) Seeder() {
+func Seeder(db *gorm.DB) error {
 	// seeder for role
 
 	cfg := GetConfig()
@@ -89,19 +90,19 @@ func (conn *SDatabase) Seeder() {
 	roleDrive := domain.Role{ Name: "Driver", Description: "This is role driver"}
 	roleUser := domain.Role{ Name: "User", Description: "This is role user"}
 
-	findRoleAdmin := conn.DB.Where("name = ?", roleAdmin.Name)
-	if findRoleAdmin.RowsAffected < 0 {
-		findRoleAdmin.Create(&roleAdmin)
+	findRoleAdmin := db.Where("name = ?", roleAdmin.Name)
+	if findRoleAdmin.RowsAffected < 1 {
+		db.Create(&roleAdmin)
 	}
 
-	findRoleDriver := conn.DB.Where("name = ?", roleDrive.Name)
-	if findRoleDriver.RowsAffected < 0 {
-		findRoleDriver.Create(&roleDrive)
+	findRoleDriver := db.Where("name = ?", roleDrive.Name)
+	if findRoleDriver.RowsAffected < 1 {
+		db.Create(&roleDrive)
 	}
 
-	findRoleUser := conn.DB.Where("name = ?", roleUser.Name)
-	if findRoleUser.RowsAffected < 0 {
-		findRoleUser.Create(&roleUser)
+	findRoleUser := db.Where("name = ?", roleUser.Name)
+	if findRoleUser.RowsAffected < 1 {
+		db.Create(&roleUser)
 	}
 
 	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(cfg.Admin.Password), 14)
@@ -115,7 +116,8 @@ func (conn *SDatabase) Seeder() {
 		Phone: "-",
 	}
 
-	if findUserAdmin := conn.DB.Where("email = ?", cfg.Admin.Email); findUserAdmin.RowsAffected < 0 {
-		findUserAdmin.Create(&userAdmin)
+	if findUserAdmin := db.Where("email = ?", cfg.Admin.Email); findUserAdmin.RowsAffected < 1 {
+		db.Create(&userAdmin)
 	}
+	return nil
 }

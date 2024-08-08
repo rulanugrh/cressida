@@ -48,49 +48,49 @@ func NewPrometheus(register prometheus.Registerer, buckets []float64) Metric {
 	})
 
 	userCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "User Service",
+		Namespace: "user_",
 		Name:      "counter_request_user_per_function",
 		Help:      "Counter request user per function",
 	}, []string{"function", "type"})
 
 	userHistory := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "User Service",
+		Namespace: "user_",
 		Name:      "histogram_request_user_per_function",
 		Help:      "Histogram request user per function",
 	}, []string{"function", "code"})
 
 	orderCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "Order Service",
+		Namespace: "order_",
 		Name:      "counter_request_order_per_function",
 		Help:      "Counter request order per function",
 	}, []string{"function", "type"})
 
 	orderHistory := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "Order Service",
+		Namespace: "order_",
 		Name:      "histogram_request_order_per_function",
 		Help:      "Histogram request order per function",
 	}, []string{"function", "code"})
 
 	vehicleCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "Vehicle Service",
+		Namespace: "vehicle_",
 		Name:      "counter_request_vehicle_per_function",
 		Help:      "Counter request vehicle per function",
 	}, []string{"function", "type"})
 
 	vehicleHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "Vehicle Service",
+		Namespace: "vehicle_",
 		Name:      "histogram_request_vehicle_per_function",
 		Help:      "Histogram request vehicle per function",
 	}, []string{"function", "code"})
 
 	transporterCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "Vehicle Service",
+		Namespace: "vehicle_",
 		Name:      "counter_request_transporter_per_function",
 		Help:      "Counter request transporter per function",
 	}, []string{"function", "type"})
 
 	transporterHistogram := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "Vehicle Service",
+		Namespace: "vehicle_",
 		Name:      "histogram_request_transporter_per_function",
 		Help:      "Histogram request transporter per function",
 	}, []string{"function", "code"})
@@ -161,26 +161,22 @@ func (m *metric) WrapHandler(name string, handler http.Handler) http.HandlerFunc
 	reg := prometheus.WrapRegistererWith(prometheus.Labels{"handler": name}, m.reg)
 
 	requestTotal := promauto.With(reg).NewCounterVec(prometheus.CounterOpts{
-		Namespace: "HTTP Service",
 		Name:      "http_request_total",
 		Help:      "Total number of HTTP requests",
 	}, []string{"method", "code"})
 
 	requestDuration := promauto.With(reg).NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "HTTP Service",
 		Name:      "http_request_duration_seconds",
 		Help:      "Duration of HTTP requests in seconds",
 		Buckets:   m.buckets,
 	}, []string{"method", "code"})
 
 	requestSize := promauto.With(reg).NewSummaryVec(prometheus.SummaryOpts{
-		Namespace: "HTTP Service",
 		Name:      "http_request_size_bytes",
 		Help:      "Size of HTTP requests in bytes",
 	}, []string{"method", "code"})
 
 	responseSize := promauto.With(reg).NewSummaryVec(prometheus.SummaryOpts{
-		Namespace: "HTTP Service",
 		Name:      "http_response_size_bytes",
 		Help:      "Size of HTTP responses in bytes",
 	}, []string{"method", "code"})
