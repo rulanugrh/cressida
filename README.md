@@ -1,5 +1,9 @@
 # Cressida
-![banner](.github/banner.png)
+<p align="center">
+    <img src=".github/banner.png" width="400">
+    <img src=".github/jaeger.png" width="50%">
+</p>
+
 
 ## Description
 Cressida about a project, where this project create API service transporter. In this project has implementation opentelemetry for tracing endpoint / function and collect some metric ( gauge, summary, histogram ) per endpoint. This project use golang with [gorilla](https://github.com/gorilla/mux) for route HTTP endpoint. Go to `http://[ip]:[port]/docs/` for detail documentation API
