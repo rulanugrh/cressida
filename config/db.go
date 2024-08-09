@@ -1,14 +1,12 @@
 package config
 
 import (
-	"context"
 	"fmt"
 	"time"
 
 	"log"
 
 	"github.com/rulanugrh/cressida/internal/entity/domain"
-	"github.com/rulanugrh/cressida/internal/helper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,18 +15,13 @@ import (
 
 type SDatabase struct {
 	DB *gorm.DB
-	trace helper.IOpenTelemetry
 }
 
 func InitPostgreSQL() *SDatabase {
-	return &SDatabase{trace: helper.NewOpenTelemetry()}
+	return &SDatabase{}
 }
 
 func (conn *SDatabase) DatabaseConnection() *gorm.DB {
-	// span for detect connection into db
-	span := conn.trace.StartTracer(context.Background(), "DatabaseConnection")
-	defer span.End()
-
 	cfg := GetConfig()
 
 	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
@@ -48,7 +41,6 @@ func (conn *SDatabase) DatabaseConnection() *gorm.DB {
 	db.Use(prometheus.New(prometheus.Config{
 		DBName: "cresida_db",
 		RefreshInterval: 5,
-		HTTPServerPort: 4000,
 		MetricsCollector: []prometheus.MetricsCollector{
 			&prometheus.Postgres{
 				VariableNames: []string{"threads_running"},

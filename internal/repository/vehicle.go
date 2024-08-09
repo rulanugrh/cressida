@@ -28,15 +28,19 @@ func NewVehicleRepository(conn *config.SDatabase) VehicleRepository {
 }
 
 func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*domain.Vehicle, error) {
-	var response domain.Vehicle
-	err := v.conn.DB.Exec("INSERT INTO vehicles(name, description) VALUES(?,?)", request.Name, request.Description).Scan(&response).Error
+	req := domain.Vehicle{
+		Name: request.Name,
+		Description: request.Description,
+	}
+
+	err := v.conn.DB.Create(&req).Error
 	if err != nil {
 		v.log.Error(fmt.Sprintf("[REPOSITORY] - [CreateVehicle] %s", err.Error()))
 		return nil, err
 	}
 
-	v.log.Info(fmt.Sprintf("[REPOSITORY] - [CreateVehicle] new data has been append: %d", response.ID))
-	return &response, nil
+	v.log.Info(fmt.Sprintf("[REPOSITORY] - [CreateVehicle] new data has been append: %d", req.Name))
+	return &req, nil
 }
 
 func(v *vehicle) FindByID(id uint) (*domain.Vehicle, error) {
@@ -53,7 +57,7 @@ func(v *vehicle) FindByID(id uint) (*domain.Vehicle, error) {
 
 func(v *vehicle) FindAll(perPage int, page int) (*[]domain.Vehicle, error) {
 	var response []domain.Vehicle
-	err := v.conn.DB.Exec("SELECT * FROM vehicles").Offset((page - 1) * perPage).Limit(perPage).Preload("Transporters").Preload("Transporters.Driver").Find(&response).Error
+	err := v.conn.DB.Exec("SELECT * FROM vehicles").Scopes(helper.ScopesPagination(page, perPage)).Preload("Transporters").Preload("Transporters.Driver").Find(&response).Error
 	if err != nil {
 		v.log.Error(fmt.Sprintf("[REPOSITORY] - [FindAllVehicle] %s", err.Error()))
 		return nil, err
@@ -96,7 +100,7 @@ func(v *vehicle) FindByIDTransporter(id uint) (*domain.Transporter, error) {
 
 func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]domain.Transporter, error) {
 	var response []domain.Transporter
-	err := v.conn.DB.Exec("SELECT * FROM transporter").Offset((page - 1) * page).Limit(perPage).Preload("Vehicle").Preload("Driver").Find(&response).Error
+	err := v.conn.DB.Exec("SELECT * FROM transporter").Scopes(helper.ScopesPagination(page, perPage)).Preload("Vehicle").Preload("Driver").Find(&response).Error
 	if err != nil {
 		v.log.Error(fmt.Sprintf("[REPOSITORY] - [FindAllTransporter] %s", err.Error()))
 		return nil, err

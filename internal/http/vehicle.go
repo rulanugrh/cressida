@@ -184,6 +184,11 @@ func (v *vehicle) GetAllVehicle(w http.ResponseWriter, r *http.Request) {
 	// create query for page
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 
+	if per_page == 0 && page == 0 {
+		page = 1
+		per_page = 10
+	}
+
 	// get data from service layer
 	data, err := v.service.FindAll(per_page, page)
 	if err != nil {
@@ -341,6 +346,11 @@ func (v *vehicle) GetAllTransporter(w http.ResponseWriter, r *http.Request) {
 	per_page, _ := strconv.Atoi(r.URL.Query().Get("per_page"))
 	// create query for page
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+
+	if per_page == 0 && page == 0 {
+		page = 1
+		per_page = 10
+	}
 
 	// get data from service layer
 	data, err := v.service.FindAllTransporter(per_page, page)

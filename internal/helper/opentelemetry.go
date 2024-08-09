@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/rulanugrh/cressida/config"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -22,21 +23,28 @@ type opentelemetry struct {
 	otl tr.Tracer
 }
 
+func NewOpenTelemetry() IOpenTelemetry {
+	return &opentelemetry{otl: otel.Tracer("github.com/rulanugrh/cressida")}
+}
+
 func InitTracer() (*trace.TracerProvider, error) {
 	// initialize response for headers
 	headers := map[string]string {
 		"Content-Type": "application/json",
 	}
 
+	cfg := config.GetConfig()
+
 	exporter, err := otlptrace.New(
 		context.Background(),
 		otlptracehttp.NewClient(
-			otlptracehttp.WithEndpoint("192.168.100.37:4317"),
+			otlptracehttp.WithEndpoint(cfg.Opentelemetry.Endpoint),
 			otlptracehttp.WithHeaders(headers),
 			otlptracehttp.WithInsecure(),
 		),
 	)
 
+	println(cfg.Opentelemetry.Endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("something error while create new exporter: %v", err)
 	}
@@ -56,11 +64,8 @@ func InitTracer() (*trace.TracerProvider, error) {
 		),
 	)
 
+	otel.SetTracerProvider(tracerProvider)
 	return tracerProvider, nil
-}
-
-func NewOpenTelemetry() IOpenTelemetry {
-	return &opentelemetry{otl: otel.Tracer("cresside-app")}
 }
 
 func (o *opentelemetry) StartTracer(ctx context.Context, name string) tr.Span {

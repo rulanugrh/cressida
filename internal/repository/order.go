@@ -124,7 +124,7 @@ func (o *order) OrderSuccess(uuid string) (*domain.Order, error) {
 
 func (o *order) CheckOrderProcess(perPage int, page int) (*[]domain.Order, error) {
 	var response []domain.Order
-	err := o.conn.DB.Exec("SELECT * FROM orders WHERE status = ?", "Process").Offset((page - 1) * page).Limit(perPage).Preload("Transporter").Preload("User").Find(&response).Error
+	err := o.conn.DB.Exec("SELECT * FROM orders WHERE status = ?", "Process").Scopes(helper.ScopesPagination(page, perPage)).Preload("Transporter").Preload("User").Find(&response).Error
 	if err != nil {
 		o.log.Error(fmt.Sprintf("[REPOSITORY] - [CheckOrderProcess] %s", err.Error()))
 		return nil, err

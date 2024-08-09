@@ -226,6 +226,11 @@ func(o *order) GetOrderProcess(w http.ResponseWriter, r *http.Request) {
 	// create query for page
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 
+	if per_page == 0 && page == 0 {
+		page = 1
+		per_page = 10
+	}
+
 	// checking is driver or admin
 	valid := o.middleware.ValidateAdminOrDriver(r.Header.Get("Authorization"))
 	if !valid {

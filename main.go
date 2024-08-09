@@ -34,6 +34,8 @@ func main() {
 		log.Fatalf("Error while trace provider: %v", err)
 	}
 
+	log.Println(err)
+
 	// defer function for checking opentelemetry while running and trace function
 	defer func(){
 		if err := opentelemetry.Shutdown(context.Background()); err != nil {

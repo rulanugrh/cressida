@@ -23,8 +23,7 @@ type App struct {
 	}
 
 	Opentelemetry struct {
-		Host string
-		Port string
+		Endpoint string
 	}
 
 	Admin struct {
@@ -70,8 +69,7 @@ func initConfig() *App {
 	conf.Server.Port = os.Getenv("SERVER_PORT")
 	conf.Server.URLDocs = os.Getenv("SERVER_URL_DOCS")
 
-	conf.Opentelemetry.Host = os.Getenv("OPENTELEMETRY_HOST")
-	conf.Opentelemetry.Port = os.Getenv("OPENTELEMETRY_PORT")
+	conf.Opentelemetry.Endpoint = os.Getenv("OTLP_ENDPOINT")
 
 	conf.Admin.Email = os.Getenv("ADMIN_EMAIL")
 	conf.Admin.Password = os.Getenv("ADMIN_PASSWORD")
