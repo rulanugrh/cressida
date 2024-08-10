@@ -2,7 +2,7 @@
 ![banner](.github/thumb.png)
 
 ## Description
-Cressida about a project, where this project create API service transporter. In this project has implementation opentelemetry for tracing endpoint / function and collect some metric ( gauge, summary, histogram ) per endpoint. This project use golang with [gorilla](https://github.com/gorilla/mux) for route HTTP endpoint. Go to `http://[ip]:[port]/docs/` for detail documentation API
+Cressida about a project, where this project create API service transporter. In this project has implementation opentelemetry for tracing endpoint / function and collect some metric ( gauge, summary, histogram ) per endpoint. This project use golang with [gorilla](https://github.com/gorilla/mux) for route HTTP endpoint. Go to `http://[ip]:[port]/swagger/` for detail documentation API
 
 ## Requirements
 - [Go](https://golang.org/) 1.18 or higher
