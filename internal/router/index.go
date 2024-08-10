@@ -12,12 +12,11 @@ import (
 	"github.com/rulanugrh/cressida/internal/helper"
 	handler "github.com/rulanugrh/cressida/internal/http"
 	httpSwagger "github.com/swaggo/http-swagger"
+	_ "github.com/rulanugrh/cressida/docs"
 )
 
 func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle handler.VehicleHandler, nofitication handler.NotificationHandler,registry *prometheus.Registry, observability helper.Metric) {
 	cfg := config.GetConfig()
-
-
 	// depend promhttp for collec with grafana and prometheus
 	promHandler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
 
@@ -26,8 +25,7 @@ func RouteEndpoint(user handler.UserHandler, order handler.OrderHandler, vehicle
 	// handling for metric
 	r.Handle("/metrics", promHandler).Methods("GET")
 	r.HandleFunc("/api/notification/", nofitication.GetAllNotificationByUserID).Methods("GET")
-	r.PathPrefix("/docs/*").Handler(httpSwagger.Handler(
-		httpSwagger.URL(cfg.Server.URLDocs),
+	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
 		httpSwagger.DeepLinking(true),
 		httpSwagger.DocExpansion("none"),
 		httpSwagger.DomID("swagger-ui"),

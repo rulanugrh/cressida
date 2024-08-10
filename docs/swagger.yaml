@@ -119,7 +119,7 @@ definitions:
     - description
     - name
     type: object
-host: localhost:8080
+host: localhost:4000
 info:
   contact: {}
   description: Implement collect metric with prometheus and tracing with jaeger

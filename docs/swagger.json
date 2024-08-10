@@ -10,7 +10,7 @@
         },
         "version": "1.1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:4000",
     "basePath": "/api/",
     "paths": {
         "/api/notif-steream/order-success": {

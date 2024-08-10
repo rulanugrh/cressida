@@ -18,7 +18,7 @@ import (
 // @description Implement collect metric with prometheus and tracing with jaeger
 
 // @BasePath /api/
-// @host localhost:8080
+// @host localhost:4000
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
