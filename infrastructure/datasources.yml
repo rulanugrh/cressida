@@ -5,3 +5,7 @@ datasources:
   type: prometheus
   url: http://prometheus-cressida:9090
   isDefault: true
+- name: Jaeger
+  type: jaeger
+  url: http://jaeger-cressida:16686
+  isDefault: true
