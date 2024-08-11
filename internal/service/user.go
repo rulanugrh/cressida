@@ -8,6 +8,7 @@ import (
 	"github.com/rulanugrh/cressida/internal/helper"
 	"github.com/rulanugrh/cressida/internal/middleware"
 	"github.com/rulanugrh/cressida/internal/repository"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -41,6 +42,7 @@ func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
 	// validation struct for request
 	err := u.validate.Validate(request)
 	if err != nil {
+		span.RecordError(err)
 		u.log.Error(fmt.Sprintf("[SERVICE] - [Register] Error while validate request: %s", err.Error()))
 		return nil, u.validate.ValidationMessage(err)
 	}
@@ -48,6 +50,7 @@ func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
 	// check email is has been taken
 	err = u.repository.CheckEmail(request.Email)
 	if err != nil {
+		span.RecordError(err)
 		u.log.Debug(fmt.Sprintf("[SERVICE] - [Register] email: %s trying to taken again", request.Email))
 		return nil, web.BadRequest("Email has been taken")
 	}
@@ -55,6 +58,7 @@ func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
 	// hashing password before insert into db
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), 14)
 	if err != nil {
+		span.RecordError(err)
 		u.log.Debug(fmt.Sprintf("[SERVICE] - [Register] email: %s error while hashing password", request.Email))
 		return nil, web.InternalServerError("Error while hashing password")
 	}
@@ -73,6 +77,7 @@ func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
 	// save data into db
 	result, errCreate := u.repository.Create(req)
 	if errCreate != nil {
+		span.RecordError(err)
 		u.log.Error(fmt.Sprintf("[SERVICE] - [Register] Error while input into db: %s", errCreate.Error()))
 		return nil, web.BadRequest("cannot create user")
 	}
@@ -83,6 +88,7 @@ func (u *user) Register(request web.Register) (*web.ResponseRegister, error) {
 		LName: result.LName,
 	}
 
+	span.AddEvent(fmt.Sprintf("New email have been created account: %s", result.Email))
 	u.log.Info(fmt.Sprintf("[SERVICE] - [Register] %s success create user", result.Email))
 	return &response, nil
 }
@@ -95,6 +101,7 @@ func (u *user) Login(request web.Login) (*web.ResponseLogin, error) {
 	// validation request user
 	err := u.validate.Validate(request)
 	if err != nil {
+		span.RecordError(err)
 		u.log.Error(fmt.Sprintf("[SERVICE] - [Login] Error while validate request: %s", err.Error()))
 		return nil, u.validate.ValidationMessage(err)
 	}
@@ -102,6 +109,7 @@ func (u *user) Login(request web.Login) (*web.ResponseLogin, error) {
 	// checking data in database
 	result, err := u.repository.Login(request)
 	if err != nil {
+		span.RecordError(err)
 		u.log.Error(fmt.Sprintf("[SERVICE] - [Login] Error while get into db: %s", err.Error()))
 		return nil, web.BadRequest("sorry you account not found")
 	}
@@ -109,6 +117,7 @@ func (u *user) Login(request web.Login) (*web.ResponseLogin, error) {
 	// checking hash password is valid
 	errCompare := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(request.Password))
 	if errCompare != nil {
+		span.RecordError(errCompare)
 		u.log.Warn(fmt.Sprintf("[SERVICE] - [Login] email: %s, request password but not matched", request.Email))
 		return nil, web.Unauthorized("sorry your password is not matched")
 	}
@@ -122,6 +131,7 @@ func (u *user) Login(request web.Login) (*web.ResponseLogin, error) {
 		RoleID: result.RoleID,
 	}
 
+	span.AddEvent(fmt.Sprintf("New user have been login into app\nName: %s\nEmail: %s", response.FName + " " + response.LName, response.Email))
 	u.log.Info(fmt.Sprintf("[SERVICE] - [Login] %s success login", result.Email))
 	return &response, nil
 }
@@ -134,6 +144,7 @@ func (u *user) GetMe(email string) (*web.ResponseGetUser, error) {
 	// checking data in database
 	result, err := u.repository.GetMe(email)
 	if err != nil {
+		span.RecordError(err)
 		u.log.Error(fmt.Sprintf("[SERVICE] - [Login] Error while get into db: %s", err.Error()))
 		return nil, web.BadRequest("sorry your account not found")
 	}
@@ -148,6 +159,7 @@ func (u *user) GetMe(email string) (*web.ResponseGetUser, error) {
 		Role:    result.Role.Name,
 	}
 
+	span.AddEvent(fmt.Sprintf("%s success access user detail", response.FName + " " + response.LName))
 	u.log.Info(fmt.Sprintf("[SERVICE] - [GetMe] %s success found", result.Email))
 	return &response, nil
 }

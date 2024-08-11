@@ -52,6 +52,7 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 	// validate request struct
 	err := o.validate.Validate(request)
 	if err != nil {
+		span.RecordError(err)
 		o.log.Error(fmt.Sprintf("[SERVICE] - [CreateOrder] Error while validate request: %s", err.Error()))
 		return nil, o.validate.ValidationMessage(err)
 	}
@@ -59,18 +60,21 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 	// create new variable for check data
 	check, err := o.vehicle.FindByIDTransporter(request.TransporterID)
 	if err != nil {
+		span.RecordError(err)
 		o.log.Debug(fmt.Sprintf("[SERVICE] - [CreateOrder] id: %d, transporter with this id not found", request.TransporterID))
 		return nil, web.NotFound("sorry transporter with this id not found")
 	}
 
 	// check the weight if it exceeds then return an error
 	if request.Weight > check.MaxWeight {
+		span.AddEvent(fmt.Sprintf("user id %d, input %d for request weight, but maximum weight is %d", request.UserID, request.Weight, check.MaxWeight))
 		o.log.Debug(fmt.Sprintf("[SERVICE] - [CreateOrder] %d kg, weight has been reach max weight", request.Weight))
 		return nil, web.BadRequest("weight exceeds the maximum weight")
 	}
 
 	// check the distance if it exceeds then return error
 	if request.Distance > check.MaxDistance {
+		span.AddEvent(fmt.Sprintf("user id %d, input %d for request distance, but limit distance is %d", request.UserID, request.Distance, check.MaxDistance))
 		o.log.Debug(fmt.Sprintf("[SERVICE] - [CreateOrder] %d km, distance has been reach max limit", request.Distance))
 		return nil, web.BadRequest("distance exceeds the specified limits")
 	}
@@ -78,6 +82,7 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 	// input data into db
 	data, errCreate := o.repository.CreateOrder(request)
 	if errCreate != nil {
+		span.RecordError(err)
 		o.log.Error(fmt.Sprintf("[SERVICE] - [CreateOrder] Error while input into db: %s", errCreate.Error()))
 		return nil, web.BadRequest("cannot create request order")
 	}
@@ -101,6 +106,7 @@ func (o *order) CreateOrder(request web.OrderRequest) (*web.OrderResponse, error
 	// create go routine for notification after create order
 	go o.notificationAfterCreateOrder(data)
 
+	span.AddEvent(fmt.Sprintf("%s create new order with order id: %s", response.UserName, data.ID.String()))
 	o.log.Info(fmt.Sprintf("[SERVICE] - [CreateOrder] new order id %s append into db", data.ID.String()))
 	return &response, nil
 }
@@ -113,6 +119,7 @@ func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
 	// get order by uuid
 	data, err := o.repository.GetOrder(uuid, userID)
 	if err != nil {
+		span.RecordError(err)
 		o.log.Error(fmt.Sprintf("[SERVICE] - [GetOrder] Error while get data in db: %s", err.Error()))
 		return nil, web.NotFound("sorry data with this uuid not found")
 	}
@@ -133,6 +140,7 @@ func (o *order) GetOrder(uuid string, userID uint) (*web.OrderResponse, error) {
 		Description:      data.Description,
 	}
 
+	span.AddEvent(fmt.Sprintf("%s create new order with order id: %s", response.UserName, data.ID.String()))
 	o.log.Info(fmt.Sprintf("[SERVICE] - [GetOrder] order id %s success found", uuid))
 	return &response, nil
 }
@@ -145,6 +153,7 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 	// get history by user id
 	data, err := o.repository.GetHistory(userID)
 	if err != nil {
+		span.RecordError(err)
 		o.log.Error(fmt.Sprintf("[SERVICE] - [GetHistory] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry history with this id not found")
 	}
@@ -168,6 +177,8 @@ func (o *order) GetHistory(userID uint) (*[]web.OrderResponse, error) {
 		})
 	}
 
+
+	span.AddEvent(fmt.Sprintf("%d success get history", userID))
 	o.log.Info(fmt.Sprintf("[SERVICE] - [GetHistory] userID: %d success get history", userID))
 	return &response, nil
 }
@@ -180,6 +191,7 @@ func (o *order) OrderSuccess(uuid string) (*web.OrderResponse, error) {
 	// get order by uuid and update status
 	data, err := o.repository.OrderSuccess(uuid)
 	if err != nil {
+		span.RecordError(err)
 		o.log.Error(fmt.Sprintf("[SERVICE] - [UpdateStatus] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry you cant update status with this order uuid")
 	}
@@ -201,7 +213,7 @@ func (o *order) OrderSuccess(uuid string) (*web.OrderResponse, error) {
 	}
 
 	tax := data.Transporter.Price * (0.11 * data.Transporter.Price)
-	_, _ = o.repository.SaveTransaction(domain.Transaction{
+	responseTransaction, _ := o.repository.SaveTransaction(domain.Transaction{
 		OrderID:     data.ID,
 		Weight:      data.Weight,
 		Distance:    data.Distance,
@@ -213,6 +225,7 @@ func (o *order) OrderSuccess(uuid string) (*web.OrderResponse, error) {
 	// start for notification after update order
 	go o.notificationUpdateStatusOrder(data)
 
+	span.AddEvent(fmt.Sprintf("order with id: %s success , and save in transaction with total: %d", uuid, responseTransaction.Subtotal))
 	o.log.Info(fmt.Sprintf("[SERVICE] - [UpdateStatus] order id %s success update status: %s", uuid, data.Status))
 	return &response, nil
 }
@@ -225,6 +238,7 @@ func (o *order) GetOrderProcess(perPage int, page int) (*[]web.OrderResponse, er
 	// get history by user id
 	data, err := o.repository.CheckOrderProcess(perPage, page)
 	if err != nil {
+		span.RecordError(err)
 		o.log.Error(fmt.Sprintf("[SERVICE] - [GetOrderProcess] Error while get data in db: %s", err.Error()))
 		return nil, web.BadRequest("sorry order not found")
 	}
@@ -260,12 +274,14 @@ func (o *order) TakeOrder(uuid string) error {
 	// create request for take order
 	data, err := o.repository.TakeOrder(uuid)
 	if err != nil {
+		span.RecordError(err)
 		return web.BadRequest(err.Error())
 	}
 
 	// start for notification after take order
 	go o.notificationWhileDriverTakeOrder(data)
 
+	span.AddEvent(fmt.Sprintf("order with id: %s , have been taking with: %s", uuid, data.Transporter.Driver.FName + " " + data.Transporter.Driver.LName))
 	return nil
 }
 

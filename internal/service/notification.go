@@ -35,6 +35,7 @@ func (n *notification) GetNotificationByUserID(userID uint) (*[]web.Notification
 	// parsing userID for get data
 	data, err := n.repository.GetNotificationByUserId(int(userID))
 	if err != nil {
+		span.RecordError(err)
 		n.log.Error(fmt.Sprintf("[SERVICE] - [GetNotificationByUserID] failure get nofiticatoin by this userID: %d", userID))
 		return nil, web.BadRequest(err.Error())
 	}
@@ -48,5 +49,6 @@ func (n *notification) GetNotificationByUserID(userID uint) (*[]web.Notification
 		})
 	}
 
+	span.AddEvent(fmt.Sprintf("user with id: %d, success get notification", userID))
 	return &responses, nil
 }

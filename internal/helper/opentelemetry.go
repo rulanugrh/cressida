@@ -9,6 +9,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
@@ -62,9 +63,11 @@ func InitTracer() (*trace.TracerProvider, error) {
 				semconv.ServiceNameKey.String("cressida-app"),
 			),
 		),
+		trace.WithSampler(trace.ParentBased(trace.TraceIDRatioBased(0.5))),
 	)
 
 	otel.SetTracerProvider(tracerProvider)
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	return tracerProvider, nil
 }
 

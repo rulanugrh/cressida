@@ -44,6 +44,7 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponse
 	// validate request struct data
 	err := v.validate.Validate(request)
 	if err != nil {
+		span.RecordError(err)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [CreateVehicle] Error while validate struct: %s", err.Error()))
 		return nil, v.validate.ValidationMessage(err)
 	}
@@ -51,6 +52,7 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponse
 	// insert data into repository
 	data, errCreate := v.repository.CreateVehicle(request)
 	if errCreate != nil {
+		span.RecordError(errCreate)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [CreateVehicle] Error while input data: %s", errCreate.Error()))
 		return nil, web.BadRequest("cannot insert vehicle")
 	}
@@ -61,6 +63,7 @@ func(v *vehicle) CreateVehicle(request web.VehicleRequest) (*web.VehicleResponse
 		Description: data.Description,
 	}
 
+	span.AddEvent(fmt.Sprintf("Success add new vehicle with name: %s", response.Name))
 	v.log.Info(fmt.Sprintf("[SERVICE] - [CreateVehicle] %s success append into db", data.Name))
 	return &response, nil
 }
@@ -73,6 +76,7 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 	// find data by id
 	data, err := v.repository.FindByID(id)
 	if err != nil {
+		span.RecordError(err)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [FindByIDVehicle] Error while get data: %s", err.Error()))
 		return nil, web.NotFound("sorry data with this id not found")
 	}
@@ -96,6 +100,7 @@ func(v *vehicle) FindByID(id uint) (*web.VehicleResponseGet, error) {
 		Transporter: transporters,
 	}
 
+	span.AddEvent(fmt.Sprintf("id: %d has been access", data.ID))
 	v.log.Info(fmt.Sprintf("[SERVICE] - [FindByIDVehicle] id: %d success found", id))
 	return &response, nil
 }
@@ -108,6 +113,7 @@ func(v *vehicle) FindAll(perPage int, page int) (*[]web.VehicleResponseGet, erro
 	// find all data vehicle
 	data, err := v.repository.FindAll(perPage, page)
 	if err != nil {
+		span.RecordError(err)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [FindAllVehcile] Error while get data: %s", err.Error()))
 		return nil, web.BadRequest("cannot find all data vehicles")
 	}
@@ -151,6 +157,7 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 	// validate request struct data
 	err := v.validate.Validate(request)
 	if err != nil {
+		span.RecordError(err)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [CreateTransporter] Error while validate struct: %s", err.Error()))
 		return nil, v.validate.ValidationMessage(err)
 	}
@@ -171,6 +178,7 @@ func(v *vehicle) CreateTransporter(request web.TransporterRequest) (*web.Transpo
 		Price: data.Price,
 	}
 
+	span.AddEvent(fmt.Sprintf("%s: transport have been added in db", response.VehicleName))
 	v.log.Info(fmt.Sprintf("[SERVICE] - [CreateTransporter] %d success append into db", data.ID))
 	return &response, nil
 }
@@ -183,6 +191,7 @@ func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) 
 	// find transporter by id
 	data, err := v.repository.FindByIDTransporter(id)
 	if err != nil {
+		span.RecordError(err)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [FindByIDTransporter] Error while get data: %s", err.Error()))
 		return nil, web.NotFound("sorry transporter not found")
 	}
@@ -194,6 +203,7 @@ func(v *vehicle) FindTransporterByID(id uint) (*web.TransporterResponse, error) 
 		Distance: data.MaxDistance,
 	}
 
+	span.AddEvent(fmt.Sprintf("%d: has been access", data.ID))
 	v.log.Info(fmt.Sprintf("[SERVICE] - [FindByIDTransporter] id: %d success found", id))
 	return &response, nil
 }
@@ -206,6 +216,7 @@ func(v *vehicle) FindAllTransporter(perPage int, page int) (*[]web.TransporterRe
 	// find all data transporter
 	data, err := v.repository.FindAllTransporter(perPage, page)
 	if err != nil {
+		span.RecordError(err)
 		v.log.Error(fmt.Sprintf("[SERVICE] - [FindAllTransporter] Error while get data: %s", err.Error()))
 		return nil, web.BadRequest("data cannot response")
 	}
