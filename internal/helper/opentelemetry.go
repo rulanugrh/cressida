@@ -66,6 +66,7 @@ func InitTracer() (*trace.TracerProvider, error) {
 		trace.WithSampler(trace.ParentBased(trace.TraceIDRatioBased(0.5))),
 	)
 
+	// set trace provider and text map propagator
 	otel.SetTracerProvider(tracerProvider)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 	return tracerProvider, nil
