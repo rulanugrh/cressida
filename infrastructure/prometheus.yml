@@ -9,3 +9,17 @@ scrape_configs:
 
   static_configs:
     - targets: ['host.docker.internal:4000']
+
+- job_name: 'postgres-cressida'
+
+  scrape_interval: 10s
+
+  static_configs:
+    - targets: ['host.docker.internal:9187']
+
+- job_name: 'node'
+
+  scrape_interval: 5s
+
+  static_configs:
+    - targets: ['host.docker.internal:9200']

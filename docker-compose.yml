@@ -32,7 +32,6 @@ services:
       - POSTGRESQL_PASS=${POSTGRESQL_PASS}
       - POSTGRESQL_PORT=${POSTGRESQL_PORT}
       - POSTGRESQL_USER=${POSTGRESQL_USER}
-
     ports:
       - 4000:${SERVER_PORT}
     networks:
@@ -67,6 +66,33 @@ services:
     networks:
       - cressida
 
+  postgres-exporter:
+    container_name: postgres-exporter
+    image:  quay.io/prometheuscommunity/postgres-exporter
+    ports:
+      - 9187:9187
+    environment:
+      - DATA_SOURCE_URI=${DATA_SOURCE_URI}
+      - DATA_SOURCE_USER=${POSTGRES_USER}
+      - DATA_SOURCE_PASS=${POSTGRES_PASS}
+    depends_on:
+      - db-cressida
+    networks:
+      - cressida
+  
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node
+    ports:
+      - 9200:9100
+    command: '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - cressida
+    depends_on:
+      - prometheus-cressida
+    
   grafana-cressida:
     container_name: grafana-cressida
     image: grafana/grafana:latest
