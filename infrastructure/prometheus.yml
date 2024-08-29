@@ -8,18 +8,18 @@ scrape_configs:
   scrape_interval: 5s # override the global default scrapping targets
 
   static_configs:
-    - targets: ['host.docker.internal:4000']
+    - targets: ['app-cressida:4000']
 
 - job_name: 'postgres-cressida'
 
   scrape_interval: 10s
 
   static_configs:
-    - targets: ['host.docker.internal:9187']
+    - targets: ['postgres-exporter:9187']
 
 - job_name: 'node'
 
   scrape_interval: 5s
 
   static_configs:
-    - targets: ['host.docker.internal:9200']
+    - targets: ['node_exporter:9200']

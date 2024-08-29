@@ -1,5 +1,5 @@
 # Cressida
-![banner](.github/thumb.png)
+![banner](.github/banner.png)
 
 ## Description
 Cressida about a project, where this project create API service transporter. In this project has implementation opentelemetry for tracing endpoint / function and collect some metric ( gauge, summary, histogram ) per endpoint. This project use golang with [gorilla](https://github.com/gorilla/mux) for route HTTP endpoint. Go to `http://[ip]:[port]/swagger/` for detail documentation API
@@ -69,9 +69,3 @@ $ make load_test_post_transporter
 # for load test user register
 $ make load_test_user_register
 ```
-
-## Grafana Output
-![banner](.github/banner.png)
-
-## Jaeger Output
-![jaeger](.github/jaeger.png)

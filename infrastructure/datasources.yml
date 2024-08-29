@@ -8,4 +8,3 @@ datasources:
 - name: Jaeger
   type: jaeger
   url: http://jaeger-cressida:16686
-  isDefault: true
